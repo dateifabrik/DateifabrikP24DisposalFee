@@ -17,7 +17,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 
 - Config
     - eigene Tabelle für Materialkosten
-    - Materialkosten können in Config aktualisiert werden
+    - Materialkosten können per Plugin-Konfiguration aktualisiert werden
 
 - Berechnung 1:
     - [Anzahl Artikel] x [Gewicht des jeweiligen Artikels] x Kosten für dieses [Material]
