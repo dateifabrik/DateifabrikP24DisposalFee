@@ -9,6 +9,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 - grundsätzliches
     - Daten sollten auch später noch in der Bestellübersicht abrufbar sein
     - aufgeschlüsselt nach Material (erleichtert die spätere Auswertung)
+    - Tabelle mit Verweis auf Kunden-ID, Bestellnummer, Felder Materialarten, Kosten
 
 - Basket:
     - Anzahl Artikel
@@ -19,13 +20,14 @@ Plugin zur Berechung der Verpackungskosten für Packing24
     - eigene Tabelle für Materialkosten
     - Materialkosten können per Plugin-Konfiguration aktualisiert werden
 
-- Berechnung 1:
+- Berechnung:
     - [Anzahl Artikel] x [Gewicht des jeweiligen Artikels] x Kosten für dieses [Material]
+    - als Artikel mit Gesamtpreis hinzufügen (reicht das, um es in der Bestellung zu haben???)
 
 - Template
     - checkout/confirm
     - anklickbar: ja, ich will
-    - Verpackungskosten als Artikel hinzufügen (reicht das, um es in der Bestellung zu haben)
+    - Ausgabe der Verpackungskosten als Artikel
 
 - Session
     - Daten der Session hinzufügen
