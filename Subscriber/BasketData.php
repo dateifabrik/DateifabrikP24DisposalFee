@@ -10,6 +10,25 @@ class BasketData implements SubscriberInterface
     /**
      * {@inheritdoc}
      */
+    public function __construct()
+    {
+        
+        $builder = Shopware()->Container()->get('models')->createQueryBuilder();
+        $builder->select(['product', 'mainVariant'])
+            ->from(\Shopware\Models\Article\Article::class, 'product')
+            ->innerJoin('product.mainDetail', 'mainVariant')
+            ->where('product.id = :productId')
+            ->setParameter('productId', 2);
+
+        // Array with \Shopware\Models\Article\Article objects
+        $objectData = $builder->getQuery()->getResult();
+        dump($objectData);
+
+        // Array with arrays
+        $arrayData = $builder->getQuery()->getArrayResult();
+        dump($arrayData);
+    }
+
     public static function getSubscribedEvents()
     {
         return [
