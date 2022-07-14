@@ -13,8 +13,9 @@
         </service>
 
         <service class="DateifabrikP24DisposalFee\Subscriber\BasketData" id="dateifabrik_p24_disposal_fee.subscriber.basket_data" public="true">
+            <argument type="service" id="dbal_connection"/>        
             <tag name="shopware.event_subscriber"/>
-        </service>        
+        </service>           
 
     </services>
 
