@@ -7,6 +7,8 @@ use Enlight\Event\SubscriberInterface;
 class BasketData implements SubscriberInterface
 {
 
+    public $blablub = 'irgendwas';
+
     /**
      * {@inheritdoc}
      */
@@ -22,25 +24,45 @@ class BasketData implements SubscriberInterface
 
         // Array with \Shopware\Models\Article\Article objects
         $objectData = $builder->getQuery()->getResult();
-        dump($objectData);
+        //dump($objectData);
 
         // Array with arrays
         $arrayData = $builder->getQuery()->getArrayResult();
-        dump($arrayData);
+        //dump($arrayData);
+
     }
 
     public static function getSubscribedEvents()
     {
         return [
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'getActionName',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
         ];
+    }
+
+    public function getActionName($args)
+    {
+        return $actionName = $args->getSubject()->request()->getQuery('action');
     }
 
     public function onPostDispatchFrontendCheckoutConfirm(\Enlight_Event_EventArgs $args)
     {
 
-        $actionName = $args->getSubject()->request()->getQuery('action');
-        if($actionName == 'confirm'){
+        $articleModel = 'Shopware\Models\Article\Article';
+
+        if($this->getActionName($args) == 'confirm'){
+
+            $builder = Shopware()->Models()->createQueryBuilder();
+            $builder->select(array('article.name'))
+                ->from($articleModel, 'article')
+                ->andwhere('article.id = 2');
+                
+            $result = $builder->getQuery()->getResult();
+
+            dump($result);
+            //die();
+            
+
             echo "<p>\$args->getSubject()->getBasket()</p>";
             dump($args->getSubject()->getBasket());
             $basketContent = $args->getSubject()->getBasket()['content'];
@@ -73,7 +95,5 @@ class BasketData implements SubscriberInterface
         }
 
     }
-
-
 
 }
