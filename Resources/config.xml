@@ -6,7 +6,7 @@
             <name>simpleTextField</name>
             <label lang="de">Text</label>
             <label lang="en">Text</label>
-            <value>preselection</value>
+            <value>Ein Text vorbelegt</value>
             <description lang="de">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut.</description>
             <description lang="en">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut.</description>
         </element>
