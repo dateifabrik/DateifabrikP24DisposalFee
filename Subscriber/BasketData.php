@@ -65,10 +65,10 @@ class BasketData implements SubscriberInterface
 
             echo "<p>\$args->getSubject()->getBasket()</p>";
             dump($args->getSubject()->getBasket());
+
             $basketContent = $args->getSubject()->getBasket()['content'];
             $basketSessionID = $args->getSubject()->getBasket()['content'][0]['sessionID'];
             $basketUserID = $args->getSubject()->getBasket()['content'][0]['userID'];
-
             $i = 0;
             foreach($basketContent as $basketItem){
                 echo "<p>\$args->getSubject()->getBasket()['content'][$i]</p>";
@@ -80,6 +80,7 @@ class BasketData implements SubscriberInterface
             // hole die Daten des Warenkorbs
             echo "<p>\$sessionIdFromRepo->findBy(['sessionId' => \$basketSessionID])</p>";
             dump($sessionIdFromRepo->findBy(['sessionId' => $basketSessionID]));
+            
 
             $userNameFromRepo = Shopware()->Models()->getRepository('Shopware\Models\Customer\Customer');
             // finde die userId mit Hilfe des Repos
@@ -87,8 +88,12 @@ class BasketData implements SubscriberInterface
             dump($name = $userNameFromRepo->find($basketUserID)->getFirstName(). ' '. $userNameFromRepo->find($basketUserID)->getLastName());
 
             // Shopware => Core => sBasket.php
-            // $module = Shopware()->Modules()->Basket();
-            // dump($module);
+            $module = Shopware()->Modules()->Basket()->sGetBasketData();
+            dump($module);
+            foreach($module['content'] as $m){
+                dump($m['additional_details']['p24_license_weight']);
+                dump($m['additional_details']['p24_license_material']);
+            }
 
             die();            
 
