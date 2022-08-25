@@ -3,6 +3,7 @@
 namespace DateifabrikP24DisposalFee\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use Shopware;
 
 class BasketData implements SubscriberInterface
 {
@@ -94,6 +95,12 @@ class BasketData implements SubscriberInterface
                 dump($m['additional_details']['p24_license_weight']);
                 dump($m['additional_details']['p24_license_material']);
             }
+
+            // Auslesen der Plugin-Konfiguration
+            //$conf = Shopware()->Config()->get('DateifabrikP24DisposalFee', 'simpleNumberField');
+            // O D E R einfach
+            $conf = Shopware()->Config()->get('simpleNumberField');
+            dump($conf);
 
             die();            
 
