@@ -32,4 +32,8 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 - Session
     - Daten der Session hinzufügen
 
+### Vorbereitungen
 
+- Hersteller anlegen
+- Produkte anlegen mit eigener Artikelnummer (Entsorgungskosten [Papier/Karton, Aluminium, sonstige Materialien *(Naturmaterialien)*, Kunststoff, Verbundstoffe])
+- 
