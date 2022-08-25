@@ -34,7 +34,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 
 ### Beispiele zur Orientierung
 
-- [biologischverpacken.de](https://www.biologischverpacken.de/ {:target="_blank"})
+- [biologischverpacken.de ]{:target="_blank"}(https://www.biologischverpacken.de/)
 - verpacken24.com/shop
 
 ### Vorbereitungen
