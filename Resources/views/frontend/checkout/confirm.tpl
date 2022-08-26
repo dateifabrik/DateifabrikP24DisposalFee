@@ -2,6 +2,7 @@
 
 {block name='frontend_checkout_confirm_form'}
     {$smarty.block.parent}
+
     <div class="panel has--border">
         <div class="panel--title primary is--underline" style="margin: 0; padding-left: 1.25rem; padding-right: 1.25rem; background: yellow;">
             Lizenzierung nach VerpackG 01.01.2019
@@ -30,6 +31,17 @@
                     </span>
                 </li>
             </ul>
+
+            <h1>form</h1>
+            <form action="https://www.packing24.de/shop/dateifabrikstaging/AddDisposalFee" method="post">
+                <select name="meineOptionen" onchange="this.form.submit()">
+                    <option selected="selected" disabled="disabled" value="">Disabled Option</option>
+                    <option value="1">Option 1</option>
+                    <option value="2">Option 2</option>
+                </select>
+                <p><button type="submit" class="btn is--primary m-0" {$state}>Entsorgungsgebühr hinzufügen</button></p>
+            </form>
+
         </div>
     </div>
 {*
