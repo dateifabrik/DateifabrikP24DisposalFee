@@ -4,6 +4,8 @@ namespace DateifabrikP24DisposalFee\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Shopware;
+use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
+use Zend\Validator\Csrf;
 
 class BasketData implements SubscriberInterface
 {
@@ -48,6 +50,12 @@ class BasketData implements SubscriberInterface
 
     public function onPostDispatchFrontendCheckoutConfirm(\Enlight_Event_EventArgs $args)
     {
+
+        $subject = $args->getSubject();
+        $view = $subject->View();
+
+        $state = 'einTest';
+        $view->assign('state', $state);
 
         $articleModel = 'Shopware\Models\Article\Article';
 
@@ -99,10 +107,13 @@ class BasketData implements SubscriberInterface
             // Auslesen der Plugin-Konfiguration
             //$conf = Shopware()->Config()->get('DateifabrikP24DisposalFee', 'simpleNumberField');
             // O D E R einfach
-            $conf = Shopware()->Config()->get('simpleNumberField');
+            $conf = Shopware()->Config()->get('simpleTextField');
             dump($conf);
 
-            die();            
+            $cont = Shopware()->Container()->get('dbal_connection');
+            dump($cont);
+
+            //die();            
 
         }
 
