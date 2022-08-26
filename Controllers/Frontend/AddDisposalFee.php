@@ -6,7 +6,11 @@ class Shopware_Controllers_Frontend_AddDisposalFee extends Enlight_Controller_Ac
     public function indexAction()
     {
         //die('index-Action');
-        $this->redirect(array('controller' => 'checkout', 'action' => 'confirm'));
+        //$this->redirect(array('controller' => 'checkout', 'action' => 'confirm'));
+
+        $request = $this->Request()->getPost();
+        dump($request);
+        die();
     }
 
 }
