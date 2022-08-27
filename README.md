@@ -41,4 +41,6 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 
 - Hersteller anlegen
 - Produkte anlegen mit eigener Artikelnummer (Entsorgungskosten [Papier/Karton, Aluminium, sonstige Materialien *(Naturmaterialien)*, Kunststoff, Verbundstoffe])
+- Datenbank Materialien vereinheitlichen, Freitextfeld mit select?
+- p24_* Felder checken, ob alle in der Form belegt sind und benötigt werden
 
