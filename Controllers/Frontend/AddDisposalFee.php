@@ -3,14 +3,17 @@
 class Shopware_Controllers_Frontend_AddDisposalFee extends Enlight_Controller_Action
 {
 
+    // Controller wird nur bei change der Werte im select-Feld ausgeführt
     public function indexAction()
     {
-        //die('index-Action');
-        //$this->redirect(array('controller' => 'checkout', 'action' => 'confirm'));
+        // hole den Wert der Option aus dem Formular-Request
+        $applyLicenseFeeOption = $this->Request()->getPost('applyLicenseFee');        
 
-        $request = $this->Request()->getPost();
-        dump($request);
-        die();
+        // schreibe den Wert einfach nur in die session,
+        // behandelt wird er dann im BasketData-Subscriber
+        $this->container->get('session')->offsetSet('applyLicenseFeeOption', $applyLicenseFeeOption);
+        $this->redirect(array('controller' => 'checkout', 'action' => 'confirm'));        
+   
     }
 
 }
