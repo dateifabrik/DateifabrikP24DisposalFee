@@ -2,21 +2,37 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
-        <element required="true" type="text" scope="locale">
-            <name>simpleTextField</name>
-            <label lang="de">Text</label>
-            <label lang="en">Text</label>
-            <value>Ein Text vorbelegt</value>
-            <description lang="de">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut.</description>
-            <description lang="en">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut.</description>
-        </element>
         <element required="true" type="number" scope="locale">
-            <name>simpleNumberField</name>
-            <label lang="de">Zahl</label>
-            <label lang="en">Integer</label>
+            <name>Aluminium</name>
+            <label lang="de">Aluminium</label>
+            <label lang="en">aluminium</label>
             <value>preselection</value>
-            <description lang="de">eine Zahl.</description>
-            <description lang="en">An integer.</description>
+            <description lang="de">Kosten pro kg</description>
+            <description lang="en">cost per kg</description>
         </element>        
+        <element required="true" type="number" scope="locale">
+            <name>Pappe</name>
+            <label lang="de">Papier / Pappe / Karton</label>
+            <label lang="en">paper / cardboard / carton</label>
+            <value>preselection</value>
+            <description lang="de">Kosten pro kg</description>
+            <description lang="en">cost per kg</description>
+        </element>        
+        <element required="true" type="number" scope="locale">
+            <name>Plastik</name>
+            <label lang="de">Kunststoff / Plastik</label>
+            <label lang="en">plastic</label>
+            <value>preselection</value>
+            <description lang="de">Kosten pro kg</description>
+            <description lang="en">cost per kg</description>
+        </element>                        
+        <element required="true" type="number" scope="locale">
+            <name>sonstige</name>
+            <label lang="de">sonstiges Material</label>
+            <label lang="en">other material</label>
+            <value>preselection</value>
+            <description lang="de">Kosten pro kg</description>
+            <description lang="en">cost per kg</description>
+        </element>                        
     </elements>
 </config>
