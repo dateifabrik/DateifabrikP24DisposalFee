@@ -28,6 +28,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
     - checkout/confirm
     - anklickbar: ja, ich will
     - Ausgabe der Verpackungskosten als Artikel
+    - Lizenzgebühren im WK delete-Funktion entfernen
 
 - Session
     - Daten der Session hinzufügen
