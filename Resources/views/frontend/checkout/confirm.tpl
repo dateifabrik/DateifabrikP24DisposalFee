@@ -45,13 +45,6 @@
 
             </div>
         </div>
-    {*
-
-        <form method="post" action="{url action='addArticle' sTargetAction=$sTargetAction}">
-            <button name="sAdd" type="submit" class="btn is--primary" value="VerpackG">{$addOrRemoveBtnText}</button>
-        </form>
-
-    *}
 
     {/if}
 {/block}
