@@ -11,7 +11,8 @@ class BasketData implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'getActionName',
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
+            //'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',
         ];
     }
 
@@ -20,7 +21,7 @@ class BasketData implements SubscriberInterface
         return $args->getSubject()->request()->getQuery('action');
     }
 
-    public function onPostDispatchFrontendCheckoutConfirm(\Enlight_Event_EventArgs $args)
+    public function onBeforeCheckout(\Enlight_Event_EventArgs $args)
     {
 
         if($this->getActionName($args) == 'confirm'){        
@@ -56,7 +57,7 @@ class BasketData implements SubscriberInterface
                         case 2:
                             $view->assign('selected1', '');
                             $view->assign('selected2', 'selected="selected"');
-                            $this->removeLicenseFeeArticles();
+                            $this->removeLicenseFeeArticles($subject);
                             break;
                     }
                 }
@@ -73,26 +74,45 @@ class BasketData implements SubscriberInterface
 
     }
 
-    private function addLicenseFeeArticles($basketContent){
+    public function addLicenseFeeArticles($basketContent){
         /*
             Was benötige ich alles?
             - Anzahl
+            - Verpackungseinheit
             - Lizenzgewicht (p24_license_weight)
             - Material (p24_license_material)
             - Preis pro kg (aus Config)
-
+            Anzahl * Verpackungseinheit * Lizenzgewicht * Preis pro kg Material
         */
-        
+
         foreach($basketContent as $content){
             $quantity = $content['quantity'];
             $additionalDetails = $content['additional_details'];
-
-        }        
-
+        }   
+        
+        // das muss in das event 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'
+        Shopware()->Modules()->Basket()->sAddArticle('11018');
 
     }     
     
-    private function removeLicenseFeeArticles(){
+    public function removeLicenseFeeArticles($subject){
+
+        $sessionId = Shopware()->Session()->get('sessionId');     
+
+        $connection = $subject->get('dbal_connection');
+        $builder = $connection->createQueryBuilder();
+
+        $builder
+            ->select('id')
+            ->from('s_order_basket')
+            ->andwhere('sessionID = :sessionID')
+            ->andwhere('ordernumber = :ordernumber')
+            ->setParameter('sessionID', $sessionId)
+            ->setParameter('ordernumber', 11018);
+
+        $orderBasketId = $builder->execute()->fetchColumn();            
+        // das muss in das event 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'
+        Shopware()->Modules()->Basket()->sDeleteArticle($orderBasketId);
 
     }    
 
