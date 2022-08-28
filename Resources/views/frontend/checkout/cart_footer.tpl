@@ -4,7 +4,7 @@
 
     {$smarty.block.parent}
 
-
+{*
     <li class="list--entry block-group" style="color: blue;">
 
         <div class="entry--label block">
@@ -17,6 +17,6 @@
         </div>
 
     </li>
-
+*}
 
 {/block}
