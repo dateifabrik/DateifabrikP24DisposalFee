@@ -10,10 +10,31 @@ class BasketData implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',            
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'getActionName',
-            //'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
+
         ];
+    }
+
+    public function onBeforeCheckout(\Enlight_Event_EventArgs $args){
+        
+        $subject        = $args->getSubject();
+        $orderVariables = $subject->get('session')->get('sOrderVariables');
+        $basketContent  = $orderVariables['sBasket']['content'];
+        $option         = $subject->get('session')->offsetGet('applyLicenseFeeOption');
+
+        if($option){
+            switch($option){
+                case 1:
+                    $this->addLicenseFeeArticles($basketContent);
+                    break;
+                case 2:
+                    $this->removeLicenseFeeArticles($subject);
+                    break;
+            }
+        }
+
     }
 
     public function getActionName($args)
@@ -21,10 +42,27 @@ class BasketData implements SubscriberInterface
         return $args->getSubject()->request()->getQuery('action');
     }
 
-    public function onBeforeCheckout(\Enlight_Event_EventArgs $args)
+    public function onPostDispatchFrontendCheckoutConfirm(\Enlight_Event_EventArgs $args)
     {
 
-        if($this->getActionName($args) == 'confirm'){        
+        if($this->getActionName($args) == 'confirm'){    
+            
+            $test = \Shopware\Components\Api\Manager::getResource('article');
+            dump(
+                $test->create(
+                    $params = array(
+                        'name' => 'LizenzTest',
+                        'tax' => array(
+                            'name' => '19',
+                            'id' => 0,
+                            'tax' => "19"
+                        ),
+                        
+                    )
+                )
+            );
+            die();
+
 
             $subject = $args->getSubject();
             $view = $subject->View();
@@ -52,12 +90,14 @@ class BasketData implements SubscriberInterface
                         case 1:
                             $view->assign('selected1', 'selected="selected"');
                             $view->assign('selected2', '');
-                            $this->addLicenseFeeArticles($basketContent);
+                            //$this->addLicenseFeeArticles($basketContent);
+                            $subject->get('session')->offsetSet('applyLicenseFeeOption', $applyLicenseFeeOption);
                             break;
                         case 2:
                             $view->assign('selected1', '');
                             $view->assign('selected2', 'selected="selected"');
-                            $this->removeLicenseFeeArticles($subject);
+                            //$this->removeLicenseFeeArticles($subject);
+                            $subject->get('session')->offsetSet('applyLicenseFeeOption', $applyLicenseFeeOption);
                             break;
                     }
                 }
@@ -90,7 +130,6 @@ class BasketData implements SubscriberInterface
             $additionalDetails = $content['additional_details'];
         }   
         
-        // das muss in das event 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'
         Shopware()->Modules()->Basket()->sAddArticle('11018');
 
     }     
@@ -111,7 +150,6 @@ class BasketData implements SubscriberInterface
             ->setParameter('ordernumber', 11018);
 
         $orderBasketId = $builder->execute()->fetchColumn();            
-        // das muss in das event 'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'
         Shopware()->Modules()->Basket()->sDeleteArticle($orderBasketId);
 
     }    
