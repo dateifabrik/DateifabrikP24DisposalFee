@@ -13,8 +13,8 @@
 
     <changelog version="0.0.2">
         <changes lang="de">
-            <item>Formular für Lizenzkosten auf checkout/confirm-Seite implementiert</item>
-            <item>Änderung der Option fügt Artikel hinzu bzw. entfernt diesen</item>
+            - Formular für Lizenzkosten auf checkout/confirm-Seite implementiert\n
+            - Änderung der Option fügt Artikel hinzu bzw. entfernt diesen
         </changes>
         <changes lang="en">Version 04.07.2022</changes>
     </changelog>
