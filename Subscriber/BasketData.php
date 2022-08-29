@@ -47,6 +47,7 @@ class BasketData implements SubscriberInterface
 
         if($this->getActionName($args) == 'confirm'){    
             
+            /*
             $test = \Shopware\Components\Api\Manager::getResource('article');
             dump(
                 $test->create(
@@ -62,6 +63,7 @@ class BasketData implements SubscriberInterface
                 )
             );
             die();
+            */
 
 
             $subject = $args->getSubject();
