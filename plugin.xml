@@ -15,8 +15,8 @@
         <changes lang="de">
         <![CDATA[
             <ul>
-                <li>Formular für Lizenzkosten auf checkout/confirm-Seite implementiert</li>
-                <li>Änderung der Option fügt Artikel hinzu bzw. entfernt diesen</li>
+                <li> - Formular für Lizenzkosten auf checkout/confirm-Seite implementiert</li>
+                <li> - Änderung der Option fügt Artikel hinzu bzw. entfernt diesen</li>
             </ul>
         ]]>
         </changes>
