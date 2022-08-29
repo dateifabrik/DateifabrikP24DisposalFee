@@ -13,28 +13,14 @@
 
     <changelog version="0.0.2">
         <changes lang="de">
-        <![CDATA[
-            - Formular für Lizenzkosten auf checkout/confirm-Seite implementiert
+            - Formular für Lizenzkosten auf checkout/confirm-Seite implementiert  
             - Änderung der Option fügt Artikel hinzu bzw. entfernt diesen
-        ]]>
         </changes>
-        <changes lang="en">
-        <![CDATA[
-            Version 04.07.2022
-        ]]> 
-        </changes>
+        <changes lang="en">Version 04.07.2022</changes>
     </changelog>
 
     <changelog version="0.0.1">
-        <changes lang="de">
-        <![CDATA[
-            Erste Version 13.07.2022
-        ]]> 
-        </changes>
-        <changes lang="en">
-        <![CDATA[
-            First version 13.07.2022
-        ]]> 
-        </changes>
+        <changes lang="de">Erste Version 13.07.2022</changes>
+        <changes lang="en">First version 13.07.2022</changes>
     </changelog>
 </plugin>
