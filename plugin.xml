@@ -12,12 +12,15 @@
     <compatibility minVersion="5.7.11"/>
 
     <changelog version="0.0.2">
-        <changes lang="de">Version 04.07.2022</changes>
+        <changes lang="de">
+            - Formular für Lizenzkosten auf checkout/confirm-Seite implementiert
+            - Änderung der Option fügt Artikel hinzu bzw. entfernt diesen
+        </changes>
         <changes lang="en">Version 04.07.2022</changes>
     </changelog>
 
     <changelog version="0.0.1">
-        <changes lang="de">Version 04.07.2022</changes>
-        <changes lang="en">Version 04.07.2022</changes>
+        <changes lang="de">Erste Version 13.07.2022</changes>
+        <changes lang="en">First version 13.07.2022</changes>
     </changelog>
 </plugin>
