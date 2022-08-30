@@ -47,25 +47,6 @@ class BasketData implements SubscriberInterface
 
         if($this->getActionName($args) == 'confirm'){    
             
-            /*
-            $test = \Shopware\Components\Api\Manager::getResource('article');
-            dump(
-                $test->create(
-                    $params = array(
-                        'name' => 'LizenzTest',
-                        'tax' => array(
-                            'name' => '19',
-                            'id' => 0,
-                            'tax' => "19"
-                        ),
-                        
-                    )
-                )
-            );
-            die();
-            */
-
-
             $subject = $args->getSubject();
             $view = $subject->View();
 
@@ -132,7 +113,7 @@ class BasketData implements SubscriberInterface
             $additionalDetails = $content['additional_details'];
         }   
         
-        Shopware()->Modules()->Basket()->sAddArticle('11018');
+        Shopware()->Modules()->Basket()->sAddArticle(11018);
 
     }     
     
