@@ -14,18 +14,19 @@ class DateifabrikP24DisposalFee extends Plugin
     public function install(InstallContext $context)
     {
 
-/* 
-            $test = \Shopware\Components\Api\Manager::getResource('Article');
+            $container = Shopware()->Container();
+            $articleApi = $container->get('shopware.api.article');
+
             $params = array(
-                'name' => 'LizenzTest',
+                'name' => 'MeinArtikelname',
                 'active' => true,
                 'tax' => '19',
-                'supplier' => 'Lizenzero',
+                'supplier' => 'MeinHersteller',
                 'categories' => [
                     'id' => 2169
                 ],                        
                 'mainDetail' => [
-                    'number' => 'turn',
+                    'number' => 'MeineNumber',
                     'active' => true,
                     'prices' => [
                         [
@@ -36,8 +37,7 @@ class DateifabrikP24DisposalFee extends Plugin
                 ]
             )
             ;
-            $test->create($params);
- */
+            $articleApi->create($params);
 
     }
 
