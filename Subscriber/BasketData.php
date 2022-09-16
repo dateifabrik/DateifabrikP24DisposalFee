@@ -13,6 +13,7 @@ class BasketData implements SubscriberInterface
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',            
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'getActionName',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
+            'Shopware_Modules_Basket_AddArticle_CheckBasketForArticle' => 'checkBasketForArticle',
 
         ];
     }
@@ -136,6 +137,14 @@ class BasketData implements SubscriberInterface
         Shopware()->Modules()->Basket()->sDeleteArticle($orderBasketId);
 
     }    
+
+    public function checkBasketForArticle(\Enlight_Event_EventArgs $args){
+        $builder = $args->get('queryBuilder');
+        $or = $builder->getParameter('ordernumber');
+        dump('Zeile 144 BasketData.php checkBasketForArticle '. $or);
+        die();
+
+    }
 
 }
 
