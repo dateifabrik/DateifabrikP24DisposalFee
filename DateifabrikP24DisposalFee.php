@@ -14,16 +14,18 @@ class DateifabrikP24DisposalFee extends Plugin
     public function install(InstallContext $context)
     {
 
-            $container = Shopware()->Container();
-            $articleApi = $container->get('shopware.api.article');
+/*          
+            $articleApi = $this->container->get('shopware.api.article');
 
             $params = array(
                 'name' => 'MeinArtikelname',
                 'active' => true,
-                'tax' => '19',
+                'taxId' => 1,
                 'supplier' => 'MeinHersteller',
                 'categories' => [
+                    [
                     'id' => 2169
+                    ]
                 ],                        
                 'mainDetail' => [
                     'number' => 'MeineNumber',
@@ -31,14 +33,15 @@ class DateifabrikP24DisposalFee extends Plugin
                     'prices' => [
                         [
                         'customerGroupKey' => 'EK',
-                        'price'=> 999.88
+                        'price'=> 999.88 // netto
                         ]
                     ]                            
                 ]
             )
             ;
             $articleApi->create($params);
-
+            
+*/
     }
 
     public function activate(ActivateContext $context)
