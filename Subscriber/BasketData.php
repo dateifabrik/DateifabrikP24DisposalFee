@@ -4,37 +4,86 @@ namespace DateifabrikP24DisposalFee\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 
+// Fall 1 : in checkout/confirm wird von nein auf ja gestellt => Lizenzartikel wird nach Berechnung des Preises hinzugefügt (und NUR DANN !!!)
+// Fall 2 : in checkout/confirm WURDE BEREITS auf ja gestellt, weiterer Artikel wird hinzugefügt => Preis der bereits vorhandenen Lizenzartikel muss angepasst werden
+// Fall 3 : in checkout/confirm wird auf nein gestellt => sind Lizenzartikel im WK? Jeder einzelne muss entfernt werden
+
 class BasketData implements SubscriberInterface
 {
+
+    public $lizenzartikel = array(11014,11016,11013,11036);
 
     public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',            
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'getActionName',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchFrontendCheckoutConfirm',
-            'Shopware_Modules_Basket_AddArticle_CheckBasketForArticle' => 'checkBasketForArticle',
+            //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onUpdatePrice',
+
+            //'Shopware_Modules_Basket_GetBasket_FilterResult' => 'start',
+            //'Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters' => 'start',
+            //'Shopware_Modules_Basket_getPricesForItemUpdates_FilterCartItemPrices' => 'start',
+            //'Shopware_Modules_Basket_UpdateArticle_FilterSqlDefault' => 'start',
+            //'Shopware_Modules_Basket_GetBasket_FilterItemStart' => 'start',
+            'Shopware_Modules_Basket_GetBasket_FilterItemEnd' => 'start',
 
         ];
     }
 
-    public function onBeforeCheckout(\Enlight_Event_EventArgs $args){
+
+    public function start(\Enlight_Event_EventArgs $args){
+        // Shopware_Modules_Basket_GetBasket_FilterResult
+        //dump($args->getReturn()['content']);
+
+        // Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters
+        //dump($args->get('cartItem')->getAdditionalInfo()); 
+        //$basketUpdate = $args->getReturn();
+        //$basketUpdate[0] = 5;
+        //return $basketUpdate;
+
+        // Shopware_Modules_Basket_getPricesForItemUpdates_FilterCartItemPrices
+        //dump($args);
+
+        // Shopware_Modules_Basket_UpdateArticle_FilterSqlDefault
+        //dump($args);
+
+        // Shopware_Modules_Basket_GetBasket_FilterItemStart
+        //dump($args);
+
+        // Shopware_Modules_Basket_GetBasket_FilterItemEnd
+        dump($args->getReturn());
         
+    }
+
+    // prüft, ob die Option zur Anwendung der Lizenzgebühren gesetzt ist oder nicht
+    // Event wird bei allen checkout actions ausgeführt
+    public function onBeforeCheckout(\Enlight_Event_EventArgs $args){
+
         $subject        = $args->getSubject();
-        $orderVariables = $subject->get('session')->get('sOrderVariables');
-        $basketContent  = $orderVariables['sBasket']['content'];
         $option         = $subject->get('session')->offsetGet('applyLicenseFeeOption');
 
+        // gibt den wk beim Hinzufügen eines Artikels vorher und nachher zurück
+        // sonst nur den ist-Zustand
+        $basketContent = Shopware()->Modules()->Basket()->sGetBasketData();
+        //dump($basketContent);
+
+
+
         if($option){
+            // Option 1 => Ja
+            // Option 2 => Nein            
             switch($option){
                 case 1:
-                    $this->addLicenseFeeArticles($basketContent);
+                    $this->addOrUpdateLicenseFeeArticles($args);
                     break;
                 case 2:
                     $this->removeLicenseFeeArticles($subject);
                     break;
             }
         }
+
+        return $option;
 
     }
 
@@ -86,6 +135,7 @@ class BasketData implements SubscriberInterface
                     }
                 }
 
+                // TODO: Optionen können aus Plugin-Config entfernt werden, da die Werte aus Artikeln ausgelesen werden sollen
                 $conf['Aluminium'] = Shopware()->Config()->getByNamespace('DateifabrikP24DisposalFee', 'Aluminium');
                 $conf['Pappe'] = Shopware()->Config()->getByNamespace('DateifabrikP24DisposalFee', 'Pappe');
                 $conf['Plastik'] = Shopware()->Config()->getByNamespace('DateifabrikP24DisposalFee', 'Plastik');
@@ -98,28 +148,32 @@ class BasketData implements SubscriberInterface
 
     }
 
-    public function addLicenseFeeArticles($basketContent){
-        /*
-            Was benötige ich alles?
-            - Anzahl
-            - Verpackungseinheit
-            - Lizenzgewicht (p24_license_weight)
-            - Material (p24_license_material)
-            - Preis pro kg (aus Config)
-            Anzahl * Verpackungseinheit * Lizenzgewicht * Preis pro kg Material
-        */
+    public function addOrUpdateLicenseFeeArticles($args){
 
-        foreach($basketContent as $content){
-            $quantity = $content['quantity'];
-            $additionalDetails = $content['additional_details'];
-        }   
-        
-        Shopware()->Modules()->Basket()->sAddArticle(11018);
+        // wenn action = confirm
+        // case 1: noch kein lizenartikel im wk
+        // füge alle benötigten lizenzartikel hinzu
+        // case 2: es ist bereits mindestens ein lizenzartikel im wk
+        // update alle lizenzartikel
 
     }     
     
     public function removeLicenseFeeArticles($subject){
 
+        // wenn action = confirm
+        // case 1: kein lizenartikel im wk
+        // nix machen
+        // case 2: es ist bereits mindestens ein lizenzartikel im wk
+        // delete alle lizenzartikel
+
+        //Shopware()->Modules()->Basket()->sDeleteArticle(836957);
+
+        //dump('removeLicenseFeeArticles, wenn Lizenzartikel vorhanden');
+
+        // Basket-Holen-Funktion                
+        //dump($this->getBasketContent($subject));
+
+/*
         $sessionId = Shopware()->Session()->get('sessionId');     
 
         $connection = $subject->get('dbal_connection');
@@ -135,16 +189,33 @@ class BasketData implements SubscriberInterface
 
         $orderBasketId = $builder->execute()->fetchColumn();            
         Shopware()->Modules()->Basket()->sDeleteArticle($orderBasketId);
-
+*/
     }    
 
-    public function checkBasketForArticle(\Enlight_Event_EventArgs $args){
-        $builder = $args->get('queryBuilder');
-        $or = $builder->getParameter('ordernumber');
-        dump('Zeile 144 BasketData.php checkBasketForArticle '. $or);
-        die();
+
+    public function getBasketContent($subject){
+        return $subject->getBasket()['content'];
+    }
+
+
+    // https://forum.shopware.com/t/korrekte-modifikation-des-sql-query-beim-filter-event-shopware-modules-basket-addarticle-filtersql/40230/10
+    public function onUpdatePrice(\Enlight_Event_EventArgs $args)
+    {
+
+        // Hier aus Shopware() oder wie auch immer die Daten zur Berechnung besorgen
+        
+        $basket = $args->getReturn();    
+        //dump($basket);
+        if($basket['ordernumber'] == 11040){
+            // überschreibe den Preis
+            $basket['price'] = 1000 / 1.19; 
+        }
+
+        // und gib den Basket mit neuen Werten zurück
+        $args->setReturn($basket);
 
     }
+
 
 }
 
@@ -157,12 +228,35 @@ class BasketData implements SubscriberInterface
 
 /*
 
+
+
+    public function test(){
+        
+        $articleModel = 'Shopware\CustomModels\ViisonPickwareERP\SupplierOrder\SupplierOrderItem';
+
+        $builder = Shopware()->Models()->createQueryBuilder();
+        $builder->select('test.id','test.deliveredQuantity')
+            ->from($articleModel, 'test')
+            ->andwhere('test.articleDetailId = 119');
+            
+        $result = $builder->getQuery()->getResult();
+    
+        dump($result);
+        
+        die();
+
+    }
+
+
     public function __construct()
     {
         
         $builder = Shopware()->Container()->get('models')->createQueryBuilder();
+        // was willste haben?
         $builder->select(['product', 'mainVariant'])
+            // aus welcher Klasse? product ist ein alias
             ->from(\Shopware\Models\Article\Article::class, 'product')
+            // wie soll gematcht werden? entspricht dem ON Statement bei einem klassischen inner join
             ->innerJoin('product.mainDetail', 'mainVariant')
             ->where('product.id = :productId')
             ->setParameter('productId', 2);
