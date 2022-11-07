@@ -12,15 +12,13 @@ class BasketData implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onBeforeCheckout',
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'checkout',
-            'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onUpdatePrice',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
+            'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onBasketUpdatePrice',
         ];
     }
 
-
-
-    public function onBeforeCheckout(\Enlight_Event_EventArgs $args){
+    public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
 
         $subject = $args->getSubject();
         $action = $subject->request()->getQuery('action');
@@ -46,14 +44,12 @@ class BasketData implements SubscriberInterface
                     case 1:
                         $view->assign('selected1', 'selected="selected"');
                         $view->assign('selected2', '');
-                        //$this->addLicenseFeeArticles($basketContent);
-                        $subject->get('session')->offsetSet('applyLicenseFeeOption', $licenseFeeOption);
+                        $this->setSessionOption($licenseFeeOption);
                         break;
                     case 2:
                         $view->assign('selected1', '');
                         $view->assign('selected2', 'selected="selected"');
-                        //$this->removeLicenseFeeArticles($subject);
-                        $subject->get('session')->offsetSet('applyLicenseFeeOption', $licenseFeeOption);
+                        $this->setSessionOption($licenseFeeOption);
                         break;
                 }
             }
@@ -61,15 +57,13 @@ class BasketData implements SubscriberInterface
         }
     }
 
-
-
-
-    public function checkout(\Enlight_Event_EventArgs $args){
+    public function onPostDispatchCheckout(){
 
         $basketData = [];
         $collectedContentData = [];
 
-        // get data from basket and store new price for disposal fee in session, so we can use it in onUpdatePrice()
+        // get data from basket
+        // and store new price for disposal fee in session, so we can use it in onUpdatePrice()
         $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
         //dump($basketData);
 
@@ -100,16 +94,41 @@ class BasketData implements SubscriberInterface
 
     }
 
+    // is thrown only on putting article into basket
+    public function onBasketUpdatePrice(\Enlight_Event_EventArgs $args){
+
+        $session = Shopware()->Session()->offsetGet('testBla');
+        //dump($session);
+
+        $basket = $args->getReturn();    
+        //dump($basket);
+        if($session == 888 AND $basket['ordernumber'] == 11012){
+            // set new price for disposal fee article
+            $basket['price'] = 1000 / 1.19; 
+        }
+
+        // return new values
+        //$args->setReturn($basket);
+
+    }
+
+
+
+
+    
+    // helper functions
+
     public function calculateDisposalFeePrice($collectedContentData){
 
+        // instanciate array with empty variables
         $calculatedDisposalFeePrice = [
             'ordernumberMaterial' => '',
             'price' => ''
         ];
         
         foreach($collectedContentData as $calcData){
-            // check if all used fields are filled, should not be empty
-            // if empty, return NULL or something helpful
+            // ToDo: ALL relevant fields must be not empty
+            // but if one of them is empty, return NULL and/or leave calculating
 
 
             if(empty($calcData['p24_license_material']) OR $calcData['p24_license_material'] == NULL){
@@ -128,29 +147,7 @@ class BasketData implements SubscriberInterface
         }
 
         return $calculatedDisposalFeePrice;
-    }
-
-    // is thrown only on putting article into basket
-    public function onUpdatePrice(\Enlight_Event_EventArgs $args){
-        $session = Shopware()->Session()->offsetGet('testBla');
-        //dump($session);
-
-        $basket = $args->getReturn();    
-        //dump($basket);
-        if($session == 888 AND $basket['ordernumber'] == 11012){
-            // set new price for disposal fee article
-            $basket['price'] = 1000 / 1.19; 
-        }
-
-        // return new values
-        //$args->setReturn($basket);
-    }
-
-
-
-
-    
-    // helper
+    }    
 
     public function addOrUpdateLicenseFeeArticles($args){
 
@@ -166,7 +163,11 @@ class BasketData implements SubscriberInterface
         dump($option);
         //die();
 
-    }      
+    }   
+    
+    public function setSessionOption($licenseFeeOption){
+        Shopware()->Session()->offsetSet('applyLicenseFeeOption', $licenseFeeOption);
+    }
 
     public function materialHelper($material){
         
