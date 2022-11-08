@@ -21,6 +21,12 @@ class BasketData implements SubscriberInterface
 
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
 
+
+        ///////////////////////////////////////////////////////////////////////
+        // ToDo
+        // Wenn der letzte Artikel mit vorhandenem Material entfernt wird,
+        // muss die Option auf NULL oder 2 gesetzt werden, damit alle Lizenzartikel ebenfalls aus dem Warenkorb entfernt werden
+
         $subject = $args->getSubject();
         $action = $subject->request()->getQuery('action');
         $view = $subject->View();        
@@ -127,8 +133,12 @@ class BasketData implements SubscriberInterface
 
     }
 
-    // is thrown on every checkout action (n times for every item in basket, 3 times for every item update (pre, now, after))
+    // is thrown on every checkout action
     public function onBasketUpdatePrice(\Enlight_Event_EventArgs $args){
+
+        //////////////////////////////////////////////////
+        //ToDo
+        // Funktion wird für onPreDispatchCheckout UND beim Hinzufügen/Anzahl ändern von Artikeln benötigt
 
         $basket = $args->getReturn();
         if($basket['ordernumber'] == 15003){
@@ -161,7 +171,7 @@ class BasketData implements SubscriberInterface
 
 
 
-    
+    ################################################################################################
     // helper functions
 
     // here we have to calculate the price(s) for the ordernumber(s) of all given material(s)
