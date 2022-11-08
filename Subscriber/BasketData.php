@@ -3,18 +3,19 @@
 namespace DateifabrikP24DisposalFee\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use Shopware\Plugins\ViisonCommon\Migrations\DocumentNameToDocumentKeyMigration;
 
 class BasketData implements SubscriberInterface
 {
 
-    // checkout post dispatch
+    protected $alleLizenzArtikelOrdernumbers = array(15003, 15004);
 
     public static function getSubscribedEvents()
     {
         return [
-            //'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
-            //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onBasketUpdatePrice',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
+            //'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
+            'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onBasketUpdatePrice',
         ];
     }
 
@@ -48,17 +49,46 @@ class BasketData implements SubscriberInterface
                         $view->assign('selected2', '');
                         // function will be executed only when license fee option is set and has changed
                         $this->setSessionOption($licenseFeeOption);
+
+                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        // TODO
+                        // einmaliges Hinzufügen der Lizenzartikel
+                        // Hier musst du bereits wissen, welche Lizenzartikel (in welcher Stückzahl) dem Warenkorb hinzugefügt werden sollen
+                        // der Preis dafür kann / muss in der onBasketUpdatePrice angepasst werden (würde hier nur wieder überschrieben werden)
+                        $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
+                        foreach($basketData as $basket){
+                            // Funktion zum Ermitteln der Materialien und der Anzahl aufrufen
+                            
+                        }
+                        // nach Erhalt der Materialien die entsprechenden Artikelnummern der Lizenzkostenartikel dem Warenkorb zuweisen
+                        Shopware()->Modules()->Basket()->sAddArticle(15003, 5); // ordernumber, quantity
+
                         break;
                     case 2:
                         $view->assign('selected1', '');
                         $view->assign('selected2', 'selected="selected"');
                         // function will be executed only when license fee option is set and has changed
                         $this->setSessionOption($licenseFeeOption);
+
+                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        // TODO                        
+                        // ALLE Lizenzartikel, die bereits im Warenkorb sind, entfernen
+                        $basket = Shopware()->Modules()->Basket()->sGetBasketData();
+                        foreach($basket['content'] as $content){
+                            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
+                                $basketIDForDeleting = $content['id'];
+                                Shopware()->Modules()->Basket()->sDeleteArticle($basketIDForDeleting);
+                            }
+                        }
+                        
+                        
+
                         break;
                 }
             }
 
         }
+
     }
 
     public function onPostDispatchCheckout(){
@@ -100,7 +130,20 @@ class BasketData implements SubscriberInterface
     // is thrown on every checkout action (n times for every item in basket, 3 times for every item update (pre, now, after))
     public function onBasketUpdatePrice(\Enlight_Event_EventArgs $args){
 
-        $session = Shopware()->Session()->offsetGet('testBla');
+        $basket = $args->getReturn();
+        if($basket['ordernumber'] == 15003){
+            // set new price for disposal fee article
+            $basket['price'] = 1000 / 1.19; 
+        }
+        // return new values
+        $args->setReturn($basket);
+
+        
+
+/*         $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
+        dump($basketData['content'][0]['id']);
+
+        $session = Shopware()->Session()->get('sessionId');
         //dump($session);
 
         $basket = $args->getReturn();    
@@ -111,7 +154,7 @@ class BasketData implements SubscriberInterface
         }
 
         // return new values
-        //$args->setReturn($basket);
+        $args->setReturn($basket); */
 
     }
 
