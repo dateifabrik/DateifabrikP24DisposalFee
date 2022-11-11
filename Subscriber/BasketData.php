@@ -3,11 +3,11 @@
 namespace DateifabrikP24DisposalFee\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use Shopware\Plugins\ViisonCommon\Migrations\DocumentNameToDocumentKeyMigration;
 
 class BasketData implements SubscriberInterface
 {
 
+    // set license fee ordernumbers
     protected $alleLizenzArtikelOrdernumbers = array(15003, 15004);
 
     public static function getSubscribedEvents()
@@ -25,129 +25,101 @@ class BasketData implements SubscriberInterface
         ///////////////////////////////////////////////////////////////////////
         // ToDo
         // Wenn der letzte Artikel mit vorhandenem Material entfernt wird,
-        // muss die Option auf NULL oder 2 gesetzt werden, damit alle Lizenzartikel ebenfalls aus dem Warenkorb entfernt werden
+        // muss der Warenkorb gelöscht werden und die Option wieder auf NULL gesetzt werden
 
-        $subject = $args->getSubject();
-        $action = $subject->request()->getQuery('action');
-        $view = $subject->View();        
-        $countryId = Shopware()->Modules()->Admin()->sGetUserData()['billingaddress']['countryId'];        
+        // nur bei Rechnungsadresse (countryId) Deutschland (2) ausführen
+        $countryId = $this->getCountryId();
+        if($countryId == 2){
 
-        // Formular anzeigen und Berechnungen nur für Action = confirm und Rechnungsadresse (countryId) Deutschland (2) ausführen        
-        if($action == 'confirm' AND $countryId == 2)
-        {
+            $subject = $args->getSubject();
+            $action = $subject->request()->getQuery('action');
+            $view = $subject->View();        
 
-            // Formular nur anzeigen, wenn countryId = 2 (Deutschland)
-            $view->assign('countryId', $countryId);         
+            // Formular anzeigen und Optionsänderung überwachen nur nur für Action = confirm        
+            if($action == 'confirm')
+            {
 
-            // Ist eine Option für Entsorgungsgebühr ausgewählt?
-            // NULL = nichts ausgewählt
-            $licenseFeeOptionBefore = Shopware()->Session()->offsetGet('licenseFeeOptionBefore');
-            $licenseFeeOption = Shopware()->Session()->offsetGet('applyLicenseFeeOption');
+                // Formular nur auf confirm-Seite anzeigen, wenn countryId = 2 (Deutschland)
+                $view->assign('countryId', $countryId);         
 
-            // function will be executed only when license fee option is set and has changed
-            if(isset($licenseFeeOption) && $licenseFeeOption != $licenseFeeOptionBefore){
+                // Zuweisung der neuen Option bei Wechsel
+                // function will be executed only when license fee option is set and has changed
+                $licenseFeeOption = $this->getSessionOption();
+                if(isset($licenseFeeOption)){
 
-                // option 1 => Yes
-                // option 2 => No
-                switch($licenseFeeOption){
-                    case 1:
-                        $view->assign('selected1', 'selected="selected"');
-                        $view->assign('selected2', '');
-                        // function will be executed only when license fee option is set and has changed
-                        $this->setSessionOption($licenseFeeOption);
+                    switch($licenseFeeOption){
+                        case 1:
+                            $view->assign('selected1', 'selected="selected"');
+                            $view->assign('selected2', '');
+                            break;
+                        case 2:
+                            $view->assign('selected1', '');
+                            $view->assign('selected2', 'selected="selected"');
+                            break;
+                    }
 
-                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        // TODO
-                        // einmaliges Hinzufügen der Lizenzartikel
-                        // Hier musst du bereits wissen, welche Lizenzartikel (in welcher Stückzahl) dem Warenkorb hinzugefügt werden sollen
-                        // der Preis dafür kann / muss in der onBasketUpdatePrice angepasst werden (würde hier nur wieder überschrieben werden)
-                        $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
-                        foreach($basketData as $basket){
-                            // Funktion zum Ermitteln der Materialien und der Anzahl aufrufen
-                            
-                        }
-                        // nach Erhalt der Materialien die entsprechenden Artikelnummern der Lizenzkostenartikel dem Warenkorb zuweisen
-                        Shopware()->Modules()->Basket()->sAddArticle(15003, 5); // ordernumber, quantity
-
-                        break;
-                    case 2:
-                        $view->assign('selected1', '');
-                        $view->assign('selected2', 'selected="selected"');
-                        // function will be executed only when license fee option is set and has changed
-                        $this->setSessionOption($licenseFeeOption);
-
-                        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        // TODO                        
-                        // ALLE Lizenzartikel, die bereits im Warenkorb sind, entfernen
-                        $basket = Shopware()->Modules()->Basket()->sGetBasketData();
-                        foreach($basket['content'] as $content){
-                            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
-                                $basketIDForDeleting = $content['id'];
-                                Shopware()->Modules()->Basket()->sDeleteArticle($basketIDForDeleting);
-                            }
-                        }
-                        
-                        
-
-                        break;
+                    $this->setSessionOption($licenseFeeOption);
                 }
+
             }
 
-        }
+        } 
 
     }
 
-    public function onPostDispatchCheckout(){
-
-        $basketData = [];
-        $collectedContentData = [];
-        // get data from basket
-        $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
-        //dump($basketData);
-
-        foreach($basketData['content'] as $content){
-
-            $collectedContentData[] = [
-                'basketId'              => $content['id'],
-                'articleId'             => $content['articleID'],
-                'ordernumber'           => $content['ordernumber'],
-                'quantity'              => $content['quantity'],                
-                'price'                 => $content['netprice'],
-                'tax_rate'              => $content['tax_rate'],
-                'p24_license_weight'    => $content['additional_details']['p24_license_weight'],
-                'p24_license_material'  => $content['additional_details']['p24_license_material'],
-                // used by materialHelper(), if p24_license_weight / p24_license_material empty or null
-                'p24_gewicht'          => $content['additional_details']['p24_gewicht'],
-                'p24_material'         => $content['additional_details']['p24_material'],
-            ];
-
-        }
-        //dump($collectedContentData);
-
-        // get calculated disposal fee price(s) and ordernumber(s) for the given materials
-        $disposalFeeOrdernumberOfMaterialAndPrice = $this->calculateDisposalFeePrice($collectedContentData);
-        dump($disposalFeeOrdernumberOfMaterialAndPrice);
-
-        // store new price for disposal fees in session, so we can use them in onUpdatePrice() function                
-        //Shopware()->Session()->offsetSet('testBla', 888);
-
-    }
 
     // is thrown on every checkout action
     public function onBasketUpdatePrice(\Enlight_Event_EventArgs $args){
 
-        //////////////////////////////////////////////////
-        //ToDo
-        // Funktion wird für onPreDispatchCheckout UND beim Hinzufügen/Anzahl ändern von Artikeln benötigt
+        // nur bei deutscher Rechnungsadresse ausführen
+        $countryId = $this->getCountryId();
+        if($countryId == 2){
 
-        $basket = $args->getReturn();
-        if($basket['ordernumber'] == 15003){
-            // set new price for disposal fee article
-            $basket['price'] = 1000 / 1.19; 
+            $licenseFeeOption = $this->getSessionOption();
+
+            if(isset($licenseFeeOption)){
+
+                // option 1 => Ja
+                // option 2 => Nein                
+                switch($licenseFeeOption){
+                    case 1:
+                    // interne Funktion aufrufen, Lizenzartikel aktualisieren (neu / nicht mehr vorhanden / Anzahl geändert)  
+                    $this->disposalFeeOrdernumberOfMaterialAndPrice();
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+
+
+                        break;                      
+                    case 2:
+                    // interne Funktion aufrufen, alle Lizenzartikel aus Basket löschen
+                        $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
+                        break;
+                }
+
+
+                //////////////////////////////////////////////////
+                //ToDo
+                // Funktion wird für onPreDispatchCheckout UND beim Hinzufügen/Anzahl ändern von Artikeln benötigt
+
+                $basket = $args->getReturn();
+                if($basket['ordernumber'] == 15003){
+                    // set new price for disposal fee article
+                    $basket['price'] = 1000 / 1.19; 
+                }
+                // return new values
+                $args->setReturn($basket);                
+
+            }        
+
         }
-        // return new values
-        $args->setReturn($basket);
-
         
 
 /*         $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
@@ -173,6 +145,38 @@ class BasketData implements SubscriberInterface
 
     ################################################################################################
     // helper functions
+
+    public function disposalFeeOrdernumberOfMaterialAndPrice(){
+
+        $basketData = [];
+        $collectedContentData = [];
+        // get data from basket
+        $basketData = $this->getBasketData();
+
+        foreach($basketData['content'] as $content){
+
+            $collectedContentData[] = [
+                'basketId'              => $content['id'],
+                'articleId'             => $content['articleID'],
+                'ordernumber'           => $content['ordernumber'],
+                'quantity'              => $content['quantity'],                
+                'price'                 => $content['netprice'],
+                'tax_rate'              => $content['tax_rate'],
+                'p24_license_weight'    => $content['additional_details']['p24_license_weight'],
+                'p24_license_material'  => $content['additional_details']['p24_license_material'],
+                // used by materialHelper(), if p24_license_weight / p24_license_material empty or null
+                'p24_gewicht'          => $content['additional_details']['p24_gewicht'],
+                'p24_material'         => $content['additional_details']['p24_material'],
+            ];
+
+        }
+
+        // get calculated disposal fee price(s) and ordernumber(s) for the given materials
+        $disposalFeeOrdernumberOfMaterialAndPrice = $this->calculateDisposalFeePrice($collectedContentData);
+        dump($disposalFeeOrdernumberOfMaterialAndPrice);
+
+    }    
+
 
     // here we have to calculate the price(s) for the ordernumber(s) of all given material(s)
     public function calculateDisposalFeePrice($collectedContentData){
@@ -223,13 +227,39 @@ class BasketData implements SubscriberInterface
     }   
     
     public function setSessionOption($licenseFeeOption){
-
-        // Option 1 => Ja
-        // Option 2 => Nein        
+    
         Shopware()->Session()->offsetSet('applyLicenseFeeOption', $licenseFeeOption);
-        Shopware()->Session()->offsetSet('licenseFeeOptionBefore', $licenseFeeOption);
 
     }
+
+    public function getSessionOption(){
+
+        return Shopware()->Session()->offsetGet('applyLicenseFeeOption');    
+
+    }
+
+    public function getCountryId(){
+
+        return Shopware()->Modules()->Admin()->sGetUserData()['billingaddress']['countryId'];    
+
+    }
+
+    public function getBasketData(){
+
+        return Shopware()->Modules()->Basket()->sGetBasketData();
+
+    }
+    public function deleteAllLicenseArticlesFromBasket($basket){
+
+        foreach($basket['content'] as $content){
+            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
+                $basketIDForDeleting = $content['id'];
+                Shopware()->Modules()->Basket()->sDeleteArticle($basketIDForDeleting);
+            }
+        }        
+
+    }
+    
 
     public function materialHelper($material){
         
