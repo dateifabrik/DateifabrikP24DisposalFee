@@ -21,7 +21,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 - Option ist NULL
 - select wird betätigt und auf 1 gestellt
 - Controller ändert den Wert in der session auf 1 und leitet an BasketData
-- **ToDo:** if($action == 'confirm' AND $countryId == 2) UND Artikel mit Lizenzmaterial im Basket sind...
+- **ToDo:** _if($action == 'confirm' AND $countryId == 2) UND Artikel mit Lizenzmaterial im Basket sind..._
 - BasketData prüft, ob sich die Option geändert hat, falls ja, setzt onPreDispatchCheckout licenseFeeOptionBefore und licenseFeeOption auf 1
 - 
 
