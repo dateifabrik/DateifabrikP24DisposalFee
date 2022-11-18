@@ -105,6 +105,9 @@ class BasketData implements SubscriberInterface
                 if(!empty($p24LicenseMaterial) && !empty($p24Material)){
                     $material = $p24LicenseMaterial;
                 }                                
+                if(!empty($p24LicenseMaterial) && empty($p24Material)){
+                    $material = $p24LicenseMaterial;
+                }                   
 
                 if($material == 'alu'){
                     $alu[] = $basket['quantity'];
@@ -130,6 +133,10 @@ class BasketData implements SubscriberInterface
 
             }
 
+            ////////////////////////////////////////////////////////////////////////////////////////
+            ########################################################################################
+            // if license article is already in basket, sUpdateArticle else sAddArticle
+
             // if($basket['ordernumber'] == 15003){
             //     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], 115);
             // }
@@ -141,7 +148,13 @@ class BasketData implements SubscriberInterface
         dump(array_sum($other_materials));                        
         dump(array_sum($plastic));
 
-        Shopware()->Modules()->Basket()->sAddArticle(15004, array_sum($plastic));
+        if(array_sum($cardboard) > 0){
+            Shopware()->Modules()->Basket()->sAddArticle(15004, array_sum($plastic));
+        }
+        if(array_sum($plastic) > 0){
+            Shopware()->Modules()->Basket()->sAddArticle(15005, array_sum($cardboard));
+        }        
+        
 
     }
 
