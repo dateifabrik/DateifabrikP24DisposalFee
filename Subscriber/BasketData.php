@@ -55,7 +55,8 @@ class BasketData implements SubscriberInterface
                         case 1:
                             $view->assign('selected1', 'selected="selected"');
                             $view->assign('selected2', '');
-                            $this->addOrUpdateLicenseArticles();
+                            // updates the licensearticles in basket
+                            $this->updateLicenseArticles();
                             break;
                         case 2:
                             $view->assign('selected1', '');
@@ -73,15 +74,74 @@ class BasketData implements SubscriberInterface
 
     }
 
-    public function addOrUpdateLicenseArticles(){
+    public function updateLicenseArticles(){
 
         $basketData = $this->getBasketData();
-        //dump($basket);
+        //dump($basketData);
+
+        $alu = array();
+        $cardboard = array();
+        $other_materials = array();        
+        $plastic = array();
+
+        // check, if material in basket is NEW, ADDED or REMOVED
         foreach($basketData['content'] as $basket){
-            if($basket['ordernumber'] == 15003){
-                Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], 115);
+
+            // don't check license articles
+            if(!in_array($basket['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
+
+                // get the material option value
+                $p24LicenseMaterial = $basket['additional_details']['p24_license_material']; // (new from) combo box option value
+                $p24Material = $basket['additional_details']['p24_material']; // (old) text like 'Pappe / PLA', materialHelper() returns new option value, if not empty
+                $standardMaterial = 'xoxo';
+
+                // beide sind leer = Standardmaterial
+                if(empty($p24LicenseMaterial) && empty($p24Material)){
+                    $material = $standardMaterial;
+                }
+                if(empty($p24LicenseMaterial) && !empty($p24Material)){
+                    $material = $this->materialHelper($p24Material);
+                }                
+                if(!empty($p24LicenseMaterial) && !empty($p24Material)){
+                    $material = $p24LicenseMaterial;
+                }                                
+
+                if($material == 'alu'){
+                    $alu[] = $basket['quantity'];
+                }
+                if($material == 'cardboard'){
+                    $cardboard[] = $basket['quantity'];
+                }
+                if($material == 'other_materials'){
+                    $other_materials[] = $basket['quantity'];
+                }                                
+                if($material == 'plastic'){
+                    $plastic[] = $basket['quantity'];
+                }                
+                
+                $materialInBasket[$basket['ordernumber']] = [
+                    'basketId'              => $basket['id'],
+                    'articleId'             => $basket['articleID'],
+                    'quantity'              => $basket['quantity'],     
+                    'puchaseunit'           => $basket['purchaseunit'],
+                    'p24_license_weight'    => $basket['additional_details']['p24_license_weight'],
+                    'material'              => $material,
+                ];
+
             }
+
+            // if($basket['ordernumber'] == 15003){
+            //     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], 115);
+            // }
         }   
+
+        dump($materialInBasket);
+        dump(array_sum($alu));
+        dump(array_sum($cardboard));
+        dump(array_sum($other_materials));                        
+        dump(array_sum($plastic));
+
+        Shopware()->Modules()->Basket()->sAddArticle(15004, array_sum($plastic));
 
     }
 
@@ -161,7 +221,7 @@ class BasketData implements SubscriberInterface
 
                         break;                      
                     case 2:
-                    // interne Funktion aufrufen, alle Lizenzartikel aus Basket löschen
+                        // interne Funktion aufrufen, alle Lizenzartikel aus Basket löschen
                         $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
                         break;
                 }
@@ -352,7 +412,7 @@ class BasketData implements SubscriberInterface
         }        
         if(in_array($material, $plastic)){
             $material = 'plastic';
-        }        
+        }
 
         return $material;
 
