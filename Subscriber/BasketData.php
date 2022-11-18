@@ -15,24 +15,21 @@ class BasketData implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             //'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
-            'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onBasketUpdatePrice',
+            //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onBasketUpdatePrice',
         ];
     }
 
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
 
-// 17.11.2022 ///////////////////////////////////////////////////////////////////////////////////
+// 18.11.2022 ///////////////////////////////////////////////////////////////////////////////////
 #################################################################################################
 
         // den basket auslesen
         // nach lizenzartikeln durchsuchen
         // falls nötig stückzahl anpassen, preis ändert sich automatisch mit
-
-        $basket = $this->getBasketData();
-        //dump($basket);
-        Shopware()->Modules()->Basket()->sUpdateArticle($basket['content'][0]['id'], 112);
+        
 #################################################################################################
-// 17.11.2022 ///////////////////////////////////////////////////////////////////////////////////        
+// 18.11.2022 ///////////////////////////////////////////////////////////////////////////////////        
 
         // nur bei Rechnungsadresse (countryId) Deutschland (2) ausführen
         $countryId = $this->getCountryId();
@@ -58,10 +55,12 @@ class BasketData implements SubscriberInterface
                         case 1:
                             $view->assign('selected1', 'selected="selected"');
                             $view->assign('selected2', '');
+                            $this->addOrUpdateLicenseArticles();
                             break;
                         case 2:
                             $view->assign('selected1', '');
                             $view->assign('selected2', 'selected="selected"');
+                            $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
                             break;
                     }
 
@@ -73,6 +72,29 @@ class BasketData implements SubscriberInterface
         } 
 
     }
+
+    public function addOrUpdateLicenseArticles(){
+
+        $basketData = $this->getBasketData();
+        //dump($basket);
+        foreach($basketData['content'] as $basket){
+            if($basket['ordernumber'] == 15003){
+                Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], 115);
+            }
+        }   
+
+    }
+
+    public function deleteAllLicenseArticlesFromBasket($basket){
+
+        foreach($basket['content'] as $content){
+            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
+                $basketIDForDeleting = $content['id'];
+                Shopware()->Modules()->Basket()->sDeleteArticle($basketIDForDeleting);
+            }
+        }        
+
+    }    
 
 
     // is thrown on every checkout action
@@ -256,16 +278,7 @@ class BasketData implements SubscriberInterface
         return Shopware()->Modules()->Basket()->sGetBasketData();
 
     }
-    public function deleteAllLicenseArticlesFromBasket($basket){
 
-        foreach($basket['content'] as $content){
-            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
-                $basketIDForDeleting = $content['id'];
-                Shopware()->Modules()->Basket()->sDeleteArticle($basketIDForDeleting);
-            }
-        }        
-
-    }
     
 
     public function materialHelper($material){
