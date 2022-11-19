@@ -174,7 +174,7 @@ class BasketData implements SubscriberInterface
                     // change to TRUE, now sAddArticle() will not be executed
                     $plasticIsUpdated = TRUE;
                 }
-                // deleting, id material is not in the array
+                // deleting, material is no longer in basket
                 if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) == 0){
                     Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
                 }                                  
