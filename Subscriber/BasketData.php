@@ -8,7 +8,7 @@ class BasketData implements SubscriberInterface
 {
 
     // set license fee ordernumbers
-    protected $alleLizenzArtikelOrdernumbers = array(15003, 15004);
+    protected $alleLizenzArtikelOrdernumbers = array('ENT-ALU-LZ', 'ENT-CARDBOARD-LZ', 'ENT-OTHER_MATERIALS-LZ', 'ENT-PLASTIC-LZ');
 
     public static function getSubscribedEvents()
     {
@@ -20,10 +20,14 @@ class BasketData implements SubscriberInterface
 
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
 
+
+
         ///////////////////////////////////////////////////////////////////////
         // ToDo
         // Wenn der letzte Artikel mit vorhandenem Material entfernt wird,
-        // müssen auch die Lizenzartikel gelöscht werden        
+        // müssen auch die Lizenzartikel gelöscht werden  
+        // Sortierung festlegen, Lizenzartikel immer am Ende
+
 
         // nur bei Rechnungsadresse (countryId) Deutschland (2) ausführen
         $countryId = $this->getCountryId();
@@ -40,29 +44,29 @@ class BasketData implements SubscriberInterface
                 // Formular nur auf confirm-Seite anzeigen, wenn countryId = 2 (Deutschland)
                 $view->assign('countryId', $countryId);         
 
-                // Zuweisung der neuen Option bei Wechsel
-                // function will be executed only when license fee option is set and has changed
-                $licenseFeeOption = $this->getSessionOption();
-                if(isset($licenseFeeOption)){
+            }
 
-                    switch($licenseFeeOption){
-                        case 1:
-                            $view->assign('selected1', 'selected="selected"');
-                            $view->assign('selected2', '');
-                            // updates the licensearticles in basket
-                            $this->updateLicenseArticles();
-                            break;
-                        case 2:
-                            $view->assign('selected1', '');
-                            $view->assign('selected2', 'selected="selected"');
-                            $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
-                            break;
-                    }
+            // Zuweisung der neuen Option bei Wechsel
+            // function will be executed only when license fee option is set and has changed
+            $licenseFeeOption = $this->getSessionOption();
+            if(isset($licenseFeeOption)){
 
-                    $this->setSessionOption($licenseFeeOption);
+                switch($licenseFeeOption){
+                    case 1:
+                        $view->assign('selected1', 'selected="selected"');
+                        $view->assign('selected2', '');
+                        // updates the licensearticles in basket
+                        $this->updateLicenseArticles();
+                        break;
+                    case 2:
+                        $view->assign('selected1', '');
+                        $view->assign('selected2', 'selected="selected"');
+                        $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
+                        break;
                 }
 
-            }
+                $this->setSessionOption($licenseFeeOption);
+            }            
 
         } 
 
@@ -77,6 +81,8 @@ class BasketData implements SubscriberInterface
         $cardboard = array();
         $other_materials = array();        
         $plastic = array();
+
+        $plasticIsUpdated = FALSE;        
 
         // check, if material in basket is NEW, ADDED or REMOVED
         foreach($basketData['content'] as $basket){
@@ -134,19 +140,31 @@ class BasketData implements SubscriberInterface
             // if($basket['ordernumber'] == 15003){
             //     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], 115);
             // }
-        }   
 
+            if(in_array($basket['ordernumber'], $this->alleLizenzArtikelOrdernumbers) && array_sum($plastic) > 0){
+                if($basket['ordernumber'] == 'ENT-ALU-LZ'){
+                    Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
+                    // dann darf die sAddArticle() aber nicht ausgeführt werden
+                    $plasticIsUpdated = TRUE;
+                }
+            }
+
+        }   
+/* 
+
+        dump($plasticIsUpdated);
         dump($materialInBasket);
         dump(array_sum($alu));
         dump(array_sum($cardboard));
         dump(array_sum($other_materials));                        
         dump(array_sum($plastic));
+ */
 
-        if(array_sum($cardboard) > 0){
-            Shopware()->Modules()->Basket()->sAddArticle(15004, array_sum($plastic));
-        }
-        if(array_sum($plastic) > 0){
-            Shopware()->Modules()->Basket()->sAddArticle(15005, array_sum($cardboard));
+        // if(array_sum($cardboard) > 0){
+        //     Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($cardboard));
+        // }
+        if($plasticIsUpdated === FALSE && array_sum($plastic) > 0){
+            Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($plastic));
         }        
         
 
@@ -166,6 +184,10 @@ class BasketData implements SubscriberInterface
 
     // is thrown on every checkout action
     public function checkoutPriceUpdateArticleFilter(\Enlight_Event_EventArgs $args){
+
+        ///////////////////////////////////////////////////////////////////////
+        // ToDo        
+        // Sortierung festlegen, Lizenzartikel immer am Ende
 
         // nur bei deutscher Rechnungsadresse ausführen
         $countryId = $this->getCountryId();
