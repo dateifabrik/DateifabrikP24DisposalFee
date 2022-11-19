@@ -173,7 +173,20 @@ class BasketData implements SubscriberInterface
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
                     // change to TRUE, now sAddArticle() will not be executed
                     $plasticIsUpdated = TRUE;
-                }                  
+                }
+                // deleting, id material is not in the array
+                if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) == 0){
+                    Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
+                }                                  
+                if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) == 0){
+                    Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
+                }                                  
+                if($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) == 0){
+                    Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
+                }                                  
+                if($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) == 0){
+                    Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
+                }                                                                                  
             }
 
         }   
