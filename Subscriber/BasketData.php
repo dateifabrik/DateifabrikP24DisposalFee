@@ -19,13 +19,20 @@ class BasketData implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
+            'Enlight_Controller_Action_PreDispatch_Frontend' => 'onAssignOrdernumbers',
             //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
         ];
     }
 
+    public function onAssignOrdernumbers(\Enlight_Event_EventArgs $args){
+
+        $subject = $args->getSubject();
+        $view = $subject->View();  
+        $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);               
+
+    }
+
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
-
-
 
         ///////////////////////////////////////////////////////////////////////
         // ToDo
@@ -41,18 +48,17 @@ class BasketData implements SubscriberInterface
             $subject = $args->getSubject();
             $action = $subject->request()->getQuery('action');
             $view = $subject->View();  
-            $licenseFeeOption = $this->getSessionOption();                  
+            $licenseFeeOption = $this->getSessionOption(); 
 
             // Formular anzeigen und Optionsänderung überwachen nur nur für Action = confirm        
             if($action == 'confirm')
             {
 
                 // Formular nur auf confirm-Seite anzeigen, wenn countryId = 2 (Deutschland)
-                $view->assign('countryId', $countryId);         
+                $view->assign('countryId', $countryId);       
 
                 // Zuweisung der neuen Option bei Wechsel
                 // functions will be executed only when license fee option is set and has changed
-
                 if(isset($licenseFeeOption)){
 
                     switch($licenseFeeOption){
@@ -109,9 +115,8 @@ class BasketData implements SubscriberInterface
 
             // don't check license articles
             if(!in_array($basket['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
-
                 // get the material option value
-                $p24LicenseMaterial = $basket['additional_details']['p24_license_material']; // (new from) combo box option value
+                $p24LicenseMaterial = $basket['additional_details']['p24_license_material']; // (new values from) combo box option value
                 $p24Material = $basket['additional_details']['p24_material']; // (old) text like 'Pappe / PLA', materialHelper() returns new option value, if not empty
                 $standardMaterial = 'xoxo';
 
@@ -140,14 +145,15 @@ class BasketData implements SubscriberInterface
                 }                                
                 if($material == 'plastic'){
                     $plastic[] = $basket['quantity'];
+                    $plasticWeight = ($basket['quantity'] * $basket['purchaseunit'] * str_replace(",",".",$basket['additional_details']['p24_license_weight']) / 1000);
                 }                
-                
+
                 $materialInBasket[$basket['ordernumber']] = [
                     'basketId'              => $basket['id'],
                     'articleId'             => $basket['articleID'],
                     'quantity'              => $basket['quantity'],     
                     'puchaseunit'           => $basket['purchaseunit'],
-                    'p24_license_weight'    => $basket['additional_details']['p24_license_weight'],
+                    'p24_license_weight'    => str_replace(",",".",$basket['additional_details']['p24_license_weight']),
                     'material'              => $material,
                 ];
 
@@ -170,6 +176,15 @@ class BasketData implements SubscriberInterface
                     $other_materialsIsUpdated = TRUE;
                 }
                 if($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0){
+
+                    //////////////////////////////////////////////////////////////////////
+                    ######################################################################
+                    //19.11.2022
+                    // Preis ist okay, muss aber vermutlich in der Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice übergeben werden
+                    ######################################################################                    
+                    //////////////////////////////////////////////////////////////////////
+
+                    $plasticPrice = (str_replace(",",".",$basket['price']) * $plasticWeight);
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
                     // change to TRUE, now sAddArticle() will not be executed
                     $plasticIsUpdated = TRUE;
@@ -203,7 +218,15 @@ class BasketData implements SubscriberInterface
         }  
         if($plasticIsUpdated === FALSE && array_sum($plastic) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
-        }                        
+        }      
+        
+        dump($plasticPrice);    
+        dump($plasticWeight);        
+        dump($materialInBasket);
+        dump(array_sum($alu));
+        dump(array_sum($cardboard));
+        dump(array_sum($other_materials));                        
+        dump(array_sum($plastic));        
         
 
     }
