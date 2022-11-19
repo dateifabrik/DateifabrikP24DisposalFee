@@ -14,22 +14,16 @@ class BasketData implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
-            //'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
-            //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'onBasketUpdatePrice',
+            //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
         ];
     }
 
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
 
-// 18.11.2022 ///////////////////////////////////////////////////////////////////////////////////
-#################################################################################################
-
-        // den basket auslesen
-        // nach lizenzartikeln durchsuchen
-        // falls nötig stückzahl anpassen, preis ändert sich automatisch mit
-        
-#################################################################################################
-// 18.11.2022 ///////////////////////////////////////////////////////////////////////////////////        
+        ///////////////////////////////////////////////////////////////////////
+        // ToDo
+        // Wenn der letzte Artikel mit vorhandenem Material entfernt wird,
+        // müssen auch die Lizenzartikel gelöscht werden        
 
         // nur bei Rechnungsadresse (countryId) Deutschland (2) ausführen
         $countryId = $this->getCountryId();
@@ -171,12 +165,7 @@ class BasketData implements SubscriberInterface
 
 
     // is thrown on every checkout action
-    public function onBasketUpdatePrice(\Enlight_Event_EventArgs $args){
-
-        ///////////////////////////////////////////////////////////////////////
-        // ToDo
-        // Wenn der letzte Artikel mit vorhandenem Material entfernt wird,
-        // müssen auch die Lizenzartikel gelöscht werden
+    public function checkoutPriceUpdateArticleFilter(\Enlight_Event_EventArgs $args){
 
         // nur bei deutscher Rechnungsadresse ausführen
         $countryId = $this->getCountryId();
@@ -184,61 +173,8 @@ class BasketData implements SubscriberInterface
 
             $licenseFeeOption = $this->getSessionOption();
 
-            if(isset($licenseFeeOption)){
-
-                // option 1 => Ja
-                // option 2 => Nein                
-                switch($licenseFeeOption){
-                    case 1:
-                    // ##### interne Funktion aufrufen, Lizenzartikel aktualisieren (neu / nicht mehr vorhanden / Anzahl geändert) ####
-                    // was ist im warenkorb?
-                    // sind bereits lizenzartikel dabei? welche? anzahl?
-                    // welche materialien haben die _anderen_ artikel, wenn sie materialien haben?
-                    // aktualisiere lizenzartikel hinsichtlich der neuen werte:
-                        // - material nicht mehr vorhanden? -> lizenzartikel aus basket entfernen
-                        // - neues material hinzugekommen? -> lizenzartikel mit anzahl hinzufügen, preis anpassen
-                        // - anzahl von materialien haben sich verändert? -> anzahl ändern, preis anpassen
-
-                        // initializing variables
-                        $basketData = [];
-                        $collectedContentData = [];
-                        
-                        // get data from basket
-                        $basketData = $this->getBasketData();
-
-                        foreach($basketData['content'] as $content){
-
-                            $collectedContentData[] = [
-                                'basketId'              => $content['id'],
-                                'articleId'             => $content['articleID'],
-                                'ordernumber'           => $content['ordernumber'],
-                                'quantity'              => $content['quantity'],                
-                                'price'                 => $content['netprice'],
-                                'tax_rate'              => $content['tax_rate'],
-                                'p24_license_weight'    => $content['additional_details']['p24_license_weight'],
-                                'p24_license_material'  => $content['additional_details']['p24_license_material'],
-                                // used by materialHelper(), if p24_license_weight / p24_license_material empty or null
-                                'p24_gewicht'          => $content['additional_details']['p24_gewicht'],
-                                'p24_material'         => $content['additional_details']['p24_material'],
-                            ];
-
-                        }
-
-
-
-
-
-                    $this->updateLicenseArticlesInBasket();
-                 
-
-
-                        break;                      
-                    case 2:
-                        // interne Funktion aufrufen, alle Lizenzartikel aus Basket löschen
-                        $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
-                        break;
-                }
-
+            if(isset($licenseFeeOption) && $licenseFeeOption == 1){
+/* 
                 $basket = $args->getReturn();
                 if($basket['ordernumber'] == 15003){
                     // set new price for disposal fee article
@@ -247,7 +183,7 @@ class BasketData implements SubscriberInterface
                 // return new values
                 $args->setReturn($basket);                
 
-            }        
+ */            }        
 
         }
         
@@ -259,84 +195,15 @@ class BasketData implements SubscriberInterface
     ################################################################################################
     // helper functions
 
-    // most wanted function ;-    
-    // hier drin alles für die Änderungen an Lizenzartikeln hinterlegen (neu / nicht mehr vorhanden / Anzahl geändert)
-    public function updateLicenseArticlesInBasket(){
+    public function getSessionOption(){
 
-        // initializing variables
-        $basketData = [];
-        $collectedContentData = [];
-        
-        // get data from basket
-        $basketData = $this->getBasketData();
-
-        foreach($basketData['content'] as $content){
-
-            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
-                // es ist ein lizenzartikel vorhanden
-            }
-
-            $collectedContentData[] = [
-                'basketId'              => $content['id'],
-                'articleId'             => $content['articleID'],
-                'ordernumber'           => $content['ordernumber'],
-                'quantity'              => $content['quantity'],                
-                'price'                 => $content['netprice'],
-                'tax_rate'              => $content['tax_rate'],
-                'p24_license_weight'    => $content['additional_details']['p24_license_weight'],
-                'p24_license_material'  => $content['additional_details']['p24_license_material'],
-                // used by materialHelper(), if p24_license_weight / p24_license_material empty or null
-                'p24_gewicht'          => $content['additional_details']['p24_gewicht'],
-                'p24_material'         => $content['additional_details']['p24_material'],
-            ];
-
-        }
-
-        // get calculated disposal fee price(s) and ordernumber(s) for the given materials
-        $disposalFeeOrdernumberOfMaterialAndPrice = $this->calculateDisposalFeePrice($collectedContentData);
-        dump($disposalFeeOrdernumberOfMaterialAndPrice);
-
-    }    
-
-
-    // here we have to calculate the price(s) for the ordernumber(s) of all given material(s)
-    public function calculateDisposalFeePrice($collectedContentData){
-
-        $calculatedDisposalFeePrice = array();
-
-        // ToDo: ALL relevant fields must be not empty
-        // but if one of them is empty, return NULL and/or leave calculating        
-        foreach($collectedContentData as $calcData){
-
-            if(empty($calcData['p24_license_material']) OR $calcData['p24_license_material'] == NULL){
-                //dump($calcData['p24_material']);
-                $material = $this->materialHelper($calcData['p24_material']);
-            }
-            else{
-                $material = $calcData['p24_license_material'];
-            }
-
-            // if material exists...
-            $calculatedDisposalFeePrice[$calcData['ordernumber']] = $calcData['price'];            
-
-            // else break here
-            //dump($material);
-            
-        }
-
-        return $calculatedDisposalFeePrice;
+        return Shopware()->Session()->offsetGet('applyLicenseFeeOption');    
 
     }    
 
     public function setSessionOption($licenseFeeOption){
     
         Shopware()->Session()->offsetSet('applyLicenseFeeOption', $licenseFeeOption);
-
-    }
-
-    public function getSessionOption(){
-
-        return Shopware()->Session()->offsetGet('applyLicenseFeeOption');    
 
     }
 
@@ -352,7 +219,6 @@ class BasketData implements SubscriberInterface
 
     }
 
-    
 
     public function materialHelper($material){
         
