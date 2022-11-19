@@ -185,6 +185,7 @@ class BasketData implements SubscriberInterface
                     //////////////////////////////////////////////////////////////////////
 
                     $plasticPrice = (str_replace(",",".",$basket['price']) * $plasticWeight);
+                    
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
                     // change to TRUE, now sAddArticle() will not be executed
                     $plasticIsUpdated = TRUE;
