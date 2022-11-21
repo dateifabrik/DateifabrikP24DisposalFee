@@ -15,3 +15,8 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 - Produkte anlegen mit eigener Artikelnummer (Entsorgungskosten [Papier/Karton, Aluminium, sonstige Materialien *(Naturmaterialien)*, Kunststoff, Verbundstoffe])
 - Datenbank Materialien vereinheitlichen, Freitextfeld mit select?
 - p24_* Felder checken, ob alle in der Form belegt sind und benötigt werden
+
+### optional
+
+- Anzeige Lizenzgebühren am Artikel
+- Anzeige im OffCanvas/Basket ohne Anzahl
