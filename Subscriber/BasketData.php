@@ -20,7 +20,7 @@ class BasketData implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'onAssignOrdernumbers',
-            //'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
+            'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
         ];
     }
 
@@ -39,6 +39,7 @@ class BasketData implements SubscriberInterface
         // Wenn der letzte Artikel mit vorhandenem Material entfernt wird,
         // müssen auch die Lizenzartikel gelöscht werden  
         // Sortierung festlegen, Lizenzartikel immer am Ende
+        // custom/plugins/DateifabrikLizenzHinweis/Services/DateifabrikLizenzHinweisService.php
 
 
         // nur bei Rechnungsadresse (countryId) Deutschland (2) ausführen
@@ -162,31 +163,26 @@ class BasketData implements SubscriberInterface
             else{
                 if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) > 0){
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($alu));
+                    Shopware()->Session()->offsetSet('aluPrice', 10);
                     // change to TRUE, now sAddArticle() will not be executed
                     $aluIsUpdated = TRUE;
                 }
                 if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) > 0){
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($cardboard));
+                    Shopware()->Session()->offsetSet('cardboardPrice', 20);
                     // change to TRUE, now sAddArticle() will not be executed
                     $cardboardIsUpdated = TRUE;
                 }                
                 if($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) > 0){
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($other_materials));
+                    Shopware()->Session()->offsetSet('other_materialPrice', 30);
                     // change to TRUE, now sAddArticle() will not be executed
                     $other_materialsIsUpdated = TRUE;
                 }
                 if($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0){
-
-                    //////////////////////////////////////////////////////////////////////
-                    ######################################################################
-                    //19.11.2022
-                    // Preis ist okay, muss aber vermutlich in der Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice übergeben werden
-                    ######################################################################                    
-                    //////////////////////////////////////////////////////////////////////
-
                     $plasticPrice = (str_replace(",",".",$basket['price']) * $plasticWeight);
-                    
                     Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
+                    Shopware()->Session()->offsetSet('plasticPrice', 40);
                     // change to TRUE, now sAddArticle() will not be executed
                     $plasticIsUpdated = TRUE;
                 }
@@ -210,24 +206,28 @@ class BasketData implements SubscriberInterface
         // if license article is not in basket yet, execute sAddArticle()
         if($aluIsUpdated === FALSE && array_sum($alu) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
+            Shopware()->Session()->offsetSet('aluPrice', 10);
         }          
         if($cardboardIsUpdated === FALSE && array_sum($cardboard) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
+            Shopware()->Session()->offsetSet('cardboardPrice', 20);
         }  
         if($other_materialsIsUpdated === FALSE && array_sum($other_materials) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
+            Shopware()->Session()->offsetSet('other_materialPrice', 30);
         }  
         if($plasticIsUpdated === FALSE && array_sum($plastic) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
+            Shopware()->Session()->offsetSet('plasticPrice', 40);            
         }      
         
-        dump($plasticPrice);    
-        dump($plasticWeight);        
-        dump($materialInBasket);
-        dump(array_sum($alu));
-        dump(array_sum($cardboard));
-        dump(array_sum($other_materials));                        
-        dump(array_sum($plastic));        
+        // dump($plasticPrice);    
+        // dump($plasticWeight);        
+        // dump($materialInBasket);
+        // dump(array_sum($alu));
+        // dump(array_sum($cardboard));
+        // dump(array_sum($other_materials));                        
+        // dump(array_sum($plastic));        
         
 
     }
@@ -250,24 +250,33 @@ class BasketData implements SubscriberInterface
         ///////////////////////////////////////////////////////////////////////
         // ToDo        
         // Sortierung festlegen, Lizenzartikel immer am Ende
+        // custom/plugins/DateifabrikLizenzHinweis/Services/DateifabrikLizenzHinweisService.php
 
         // nur bei deutscher Rechnungsadresse ausführen
         $countryId = $this->getCountryId();
         if($countryId == 2){
 
             $licenseFeeOption = $this->getSessionOption();
+            $plasticPrice = Shopware()->Session()->offsetGet('plasticPrice');
+            $cardboardPrice = Shopware()->Session()->offsetGet('cardboardPrice');
 
             if(isset($licenseFeeOption) && $licenseFeeOption == 1){
-/* 
-                $basket = $args->getReturn();
-                if($basket['ordernumber'] == 15003){
-                    // set new price for disposal fee article
-                    $basket['price'] = 1000 / 1.19; 
-                }
-                // return new values
-                $args->setReturn($basket);                
 
- */            }        
+                // $basket = $args->getReturn();
+                // if($basket['ordernumber'] == 'ENT-PLASTIC-LZ'){
+                //     // set new price for disposal fee article
+                //     $basket['price'] = $plasticPrice / 1.19; 
+                // }
+                // $args->setReturn($basket);
+                // $basket = $args->getReturn();
+                // if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ'){
+                //     // set new price for disposal fee article
+                //     $basket['price'] = $cardboardPrice / 1.19; 
+                // }                
+                // // return new values
+                // $args->setReturn($basket);
+
+            }        
 
         }
         
