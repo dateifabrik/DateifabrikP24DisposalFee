@@ -6,7 +6,7 @@ use Enlight\Event\SubscriberInterface;
 
 class BasketData implements SubscriberInterface
 {
-    // Test dev
+    // Test dev mit noch mehr Text
     // set license fee ordernumbers
     protected $alleLizenzArtikelOrdernumbers = array(
         'ENT-ALU-LZ',
