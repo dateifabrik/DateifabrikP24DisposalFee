@@ -48,3 +48,19 @@
 
     {/if}
 {/block}
+
+
+{block name='frontend_checkout_confirm_item_outer'}
+    
+    {foreach $sBasket.content as $content}
+        {if $content.additional_details.supplierID == 20}
+            {$content.ordernumber} {$content.articlename}<br />
+        {/if}
+    {/foreach}
+    
+    {foreach $sBasket.content as $sBasketItem}
+        {block name='frontend_checkout_confirm_item'}
+            {include file='frontend/checkout/confirm_item.tpl' isLast=$sBasketItem@last}
+        {/block}
+    {/foreach}
+{/block}

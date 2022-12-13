@@ -1,5 +1,17 @@
 <?php
 
+/*
+
++-------------+-----------+-------------------+----------------------+
+| ordernumber | articleID | p24_material      | p24_license_material |
++-------------+-----------+-------------------+----------------------+
+| 11012       |         4 | Kunststoff ( PP ) | plastic              |
+| 14017       |       114 |                   | cardboard            |
+| 12164       |      5461 |                   | plastic              |
++-------------+-----------+-------------------+----------------------+
+
+*/
+
 namespace DateifabrikP24DisposalFee\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
@@ -18,8 +30,8 @@ class BasketData implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'onAssignOrdernumbers',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
         ];
     }
@@ -29,6 +41,37 @@ class BasketData implements SubscriberInterface
         $subject = $args->getSubject();
         $view = $subject->View();  
         $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);               
+
+        $basket = $this->getBasketData();
+        //dump($basket['content']);
+        $i = 0;
+        foreach($basket['content'] as $mycontent){
+            if($mycontent['additional_details']['supplierID'] == 20){
+                $hangOn = $mycontent;
+                unset($basket['content'][$i]);
+                array_push($basket['content'], $hangOn);
+            }
+            $i++;
+        }
+        
+        $basket['content'] = array_values($basket['content']);
+        //dump($basket);
+
+
+        foreach($basket['content'] as $content){
+            // $content['additional_details'][supplierID] = 20
+            //dump($content['additional_details']['supplierID']);
+            //$supplierID[] = $content['additional_details']['supplierID'];
+            if($content['additional_details']['supplierID'] == 20){
+                
+                //array_push($basket['content'], $content);
+            }
+            $i++;
+
+        }
+        //sort($supplierID);
+        //dump($supplierID);
+        //dump($basket);
 
     }
 
