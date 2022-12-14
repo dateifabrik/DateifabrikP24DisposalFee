@@ -42,37 +42,6 @@ class BasketData implements SubscriberInterface
         $view = $subject->View();  
         $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);               
 
-        $basket = $this->getBasketData();
-        //dump($basket['content']);
-        $i = 0;
-        foreach($basket['content'] as $mycontent){
-            if($mycontent['additional_details']['supplierID'] == 20){
-                $hangOn = $mycontent;
-                unset($basket['content'][$i]);
-                array_push($basket['content'], $hangOn);
-            }
-            $i++;
-        }
-        
-        $basket['content'] = array_values($basket['content']);
-        //dump($basket);
-
-
-        foreach($basket['content'] as $content){
-            // $content['additional_details'][supplierID] = 20
-            //dump($content['additional_details']['supplierID']);
-            //$supplierID[] = $content['additional_details']['supplierID'];
-            if($content['additional_details']['supplierID'] == 20){
-                
-                //array_push($basket['content'], $content);
-            }
-            $i++;
-
-        }
-        //sort($supplierID);
-        //dump($supplierID);
-        //dump($basket);
-
     }
 
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
@@ -133,7 +102,39 @@ class BasketData implements SubscriberInterface
                         break;
                 }
 
-            }                
+            } 
+            
+            $basket = $this->getBasketData();
+            //dump($basket['content']);
+            $i = 0;
+            foreach($basket['content'] as $mycontent){
+                if($mycontent['additional_details']['supplierID'] == 20){
+                    $hangOn = $mycontent;
+                    unset($basket['content'][$i]);
+                    array_push($basket['content'], $hangOn);
+                }
+                $i++;
+            }
+            
+            $basket['content'] = array_values($basket['content']);
+            //dump($basket);
+            $view->assign('mySort', $basket);
+    
+    
+            foreach($basket['content'] as $content){
+                // $content['additional_details'][supplierID] = 20
+                //dump($content['additional_details']['supplierID']);
+                //$supplierID[] = $content['additional_details']['supplierID'];
+                if($content['additional_details']['supplierID'] == 20){
+                    
+                    //array_push($basket['content'], $content);
+                }
+                $i++;
+    
+            }
+            //sort($supplierID);
+            //dump($supplierID);
+            //dump($basket);            
 
         } 
 
