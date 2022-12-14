@@ -1,10 +1,13 @@
 {extends file="parent:frontend/checkout/ajax_cart.tpl"}
 
 {block name='frontend_checkout_ajax_cart_item_container_inner'}
+
+    {if isset($mySort)}
+        {$sBasket=$mySort}
+    {/if}
     {if $sBasket.content}
         {foreach $sBasket.content as $sBasketItem}
             {block name='frontend_checkout_ajax_cart_row'}
-                {$sBasketItem.ordernumber}
                 {include file="frontend/checkout/ajax_cart_item.tpl" basketItem=$sBasketItem}
             {/block}
         {/foreach}

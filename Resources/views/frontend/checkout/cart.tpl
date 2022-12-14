@@ -10,13 +10,10 @@
                 {include file="frontend/checkout/cart_header.tpl"}
             {/block}
 
-    {foreach $sBasket.content as $content}
-        {if $content.additional_details.supplierID == 20}
-            {$content.ordernumber} {$content.articlename}<br />
-        {/if}
-    {/foreach}            
-
             {* Basket items *}
+            {if isset($mySort)}
+                {$sBasket=$mySort}
+            {/if}            
             {foreach $sBasket.content as $sBasketItem}
                 {block name='frontend_checkout_cart_item'}
                     {include file='frontend/checkout/cart_item.tpl' isLast=$sBasketItem@last}
