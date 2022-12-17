@@ -150,10 +150,10 @@ class BasketData implements SubscriberInterface
         $other_materials = array();        
         $plastic = array();
 
-        $aluIsUpdated = FALSE;
-        $cardboardIsUpdated = FALSE;        
-        $other_materialsIsUpdated = FALSE;  
-        $plasticIsUpdated = FALSE;        
+        $updateAluInBasket = FALSE;
+        $updateCardboardInBasket = FALSE;        
+        $updateOtherMaterialsInBasket = FALSE;  
+        $updatePlasticInBasket = FALSE;        
 
         // check, if material in basket is NEW, ADDED or REMOVED
         foreach($basketData['content'] as $basket){
@@ -203,32 +203,36 @@ class BasketData implements SubscriberInterface
                 ];
 
             }
-            // if license article is already in basket, sUpdateArticle else sAddArticle
+            // if license article is already in basket, prepare update/add or delete from basket
             else{
                 if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) > 0){
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($alu));
-                    Shopware()->Session()->offsetSet('aluPrice', 10);
+                    //Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($alu));
+                    //Shopware()->Session()->offsetSet('aluPrice', 10);
                     // change to TRUE, now sAddArticle() will not be executed
-                    $aluIsUpdated = TRUE;
+                    $updateAluInBasket = TRUE;
+                    $basketIdAlu = $basket['id'];                    
                 }
                 if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) > 0){
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($cardboard));
-                    Shopware()->Session()->offsetSet('cardboardPrice', 20);
+                    //Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($cardboard));
+                    //Shopware()->Session()->offsetSet('cardboardPrice', 20);
                     // change to TRUE, now sAddArticle() will not be executed
-                    $cardboardIsUpdated = TRUE;
+                    $updateCardboardInBasket = TRUE;
+                    $basketIdCardboard = $basket['id'];                     
                 }                
                 if($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) > 0){
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($other_materials));
-                    Shopware()->Session()->offsetSet('other_materialPrice', 30);
+                    //Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($other_materials));
+                    //Shopware()->Session()->offsetSet('other_materialPrice', 30);
                     // change to TRUE, now sAddArticle() will not be executed
-                    $other_materialsIsUpdated = TRUE;
+                    $updateOtherMaterialsInBasket = TRUE;
+                    $basketIdOtherMaterials = $basket['id'];
                 }
                 if($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0){
-                    $plasticPrice = (str_replace(",",".",$basket['price']) * $plasticWeight);
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
-                    Shopware()->Session()->offsetSet('plasticPrice', 40);
+                    //$plasticPrice = (str_replace(",",".",$basket['price']) * $plasticWeight);
+                    //Shopware()->Modules()->Basket()->sUpdateArticle($basket['id'], array_sum($plastic));
+                    //Shopware()->Session()->offsetSet('plasticPrice', 40);
                     // change to TRUE, now sAddArticle() will not be executed
-                    $plasticIsUpdated = TRUE;
+                    $updatePlasticInBasket = TRUE;
+                    $basketIdPlastic = $basket['id'];
                 }
                 // deleting, material is no longer in basket
                 if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) == 0){
@@ -247,20 +251,38 @@ class BasketData implements SubscriberInterface
 
         }   
 
-        // if license article is not in basket yet, execute sAddArticle()
-        if($aluIsUpdated === FALSE && array_sum($alu) > 0){
+        // license article has to be updated
+        if($updateAluInBasket === TRUE){
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));
+            Shopware()->Session()->offsetSet('aluPrice', 10);            
+        }
+        if($updateCardboardInBasket === TRUE){
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));
+            Shopware()->Session()->offsetSet('cardboardPrice', 20);            
+        }
+        if($updateOtherMaterialsInBasket === TRUE){
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdOtherMaterials, array_sum($other_materials));
+            Shopware()->Session()->offsetSet('other_materialPrice', 30);
+        }                       
+        if($updatePlasticInBasket === TRUE){
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));
+            Shopware()->Session()->offsetSet('plasticPrice', 40);             
+        }
+
+        // license article has to be added
+        if($updateAluInBasket === FALSE && array_sum($alu) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
             Shopware()->Session()->offsetSet('aluPrice', 10);
         }          
-        if($cardboardIsUpdated === FALSE && array_sum($cardboard) > 0){
+        if($updateCardboardInBasket === FALSE && array_sum($cardboard) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
             Shopware()->Session()->offsetSet('cardboardPrice', 20);
         }  
-        if($other_materialsIsUpdated === FALSE && array_sum($other_materials) > 0){
+        if($updateOtherMaterialsInBasket === FALSE && array_sum($other_materials) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
             Shopware()->Session()->offsetSet('other_materialPrice', 30);
         }  
-        if($plasticIsUpdated === FALSE && array_sum($plastic) > 0){
+        if($updatePlasticInBasket === FALSE && array_sum($plastic) > 0){
             Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
             Shopware()->Session()->offsetSet('plasticPrice', 40);            
         }      
