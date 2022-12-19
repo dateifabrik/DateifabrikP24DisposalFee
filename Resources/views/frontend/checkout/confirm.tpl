@@ -52,9 +52,11 @@
 
 {block name='frontend_checkout_confirm_item_outer'}
 
-    {if isset($mySort)}
-        {$sBasket=$mySort}
+    {* sets new item order *}
+    {if isset($sortedItemsForBasketView)}
+        {$sBasket=$sortedItemsForBasketView}
     {/if}
+    
     {foreach $sBasket.content as $sBasketItem}
         {block name='frontend_checkout_confirm_item'}
             {include file='frontend/checkout/confirm_item.tpl' isLast=$sBasketItem@last}

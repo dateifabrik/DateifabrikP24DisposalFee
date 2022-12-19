@@ -10,10 +10,12 @@
                 {include file="frontend/checkout/cart_header.tpl"}
             {/block}
 
-            {* Basket items *}
-            {if isset($mySort)}
-                {$sBasket=$mySort}
+            {* sets new item order *}
+            {if isset($sortedItemsForBasketView)}
+                {$sBasket=$sortedItemsForBasketView}
             {/if}            
+
+            {* Basket items *}
             {foreach $sBasket.content as $sBasketItem}
                 {block name='frontend_checkout_cart_item'}
                     {include file='frontend/checkout/cart_item.tpl' isLast=$sBasketItem@last}

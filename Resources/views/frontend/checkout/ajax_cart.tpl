@@ -2,9 +2,11 @@
 
 {block name='frontend_checkout_ajax_cart_item_container_inner'}
 
-    {if isset($mySort)}
-        {$sBasket=$mySort}
+    {* sets new item order *}
+    {if isset($sortedItemsForBasketView)}
+        {$sBasket=$sortedItemsForBasketView}
     {/if}
+    
     {if $sBasket.content}
         {foreach $sBasket.content as $sBasketItem}
             {block name='frontend_checkout_ajax_cart_row'}
