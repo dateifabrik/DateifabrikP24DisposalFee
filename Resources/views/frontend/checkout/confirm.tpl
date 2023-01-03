@@ -6,6 +6,8 @@
         {* Formular nur für Rechnungsadresse Deutschland ausgeben *}
         {if $countryId == 2}
 
+        <div class="mymodal"></div>
+
         <div class="panel has--border">
             <div class="panel--title primary is--underline">
                 Lizenzgebühren nach VerpackG
