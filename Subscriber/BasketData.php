@@ -136,7 +136,12 @@ class BasketData implements SubscriberInterface
         $updateAluInBasket = FALSE;
         $updateCardboardInBasket = FALSE;        
         $updateOtherMaterialsInBasket = FALSE;  
-        $updatePlasticInBasket = FALSE;        
+        $updatePlasticInBasket = FALSE;    
+        
+        $addAlu = FALSE;
+        $addCardboard = FALSE;
+        $addOtherMaterials = FALSE;
+        $addPlastic = FALSE;
 
         // check, if material in basket is NEW, ADDED or REMOVED
         foreach($basketData['content'] as $basket){
@@ -164,15 +169,19 @@ class BasketData implements SubscriberInterface
 
                 if($material == 'alu'){
                     $alu[] = $basket['quantity'];
+                    $addAlu = TRUE;
                 }
                 if($material == 'cardboard'){
                     $cardboard[] = $basket['quantity'];
+                    $addCardboard = TRUE;
                 }
                 if($material == 'other_materials'){
                     $other_materials[] = $basket['quantity'];
+                    $addOtherMaterials = TRUE;
                 }                                
                 if($material == 'plastic'){
                     $plastic[] = $basket['quantity'];
+                    $addPlastic = TRUE;
                     $plasticWeight = ($basket['quantity'] * $basket['purchaseunit'] * str_replace(",",".",$basket['additional_details']['p24_license_weight']) / 1000);
                 }                
 
@@ -211,6 +220,24 @@ class BasketData implements SubscriberInterface
                 }                                                                                  
             }
 
+            // license article has to be added
+            if($addAlu === TRUE && array_sum($alu) > 0){
+                Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
+                Shopware()->Session()->offsetSet('aluPrice', 10);
+            }          
+            if($addCardboard === TRUE && array_sum($cardboard) > 0){
+                Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
+                Shopware()->Session()->offsetSet('cardboardPrice', 20);
+            }  
+            if($addOtherMaterials === TRUE && array_sum($other_materials) > 0){
+                Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
+                Shopware()->Session()->offsetSet('other_materialPrice', 30);
+            }              
+            if($addPlastic === TRUE && array_sum($plastic) > 0){
+                Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
+                Shopware()->Session()->offsetSet('plasticPrice', 40);            
+            }              
+
         }   
 
         // license article has to be updated
@@ -231,23 +258,8 @@ class BasketData implements SubscriberInterface
             Shopware()->Session()->offsetSet('plasticPrice', 40);             
         }
 
-        // license article has to be added
-        if($updateAluInBasket === FALSE && array_sum($alu) > 0){
-            Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
-            Shopware()->Session()->offsetSet('aluPrice', 10);
-        }          
-        if($updateCardboardInBasket === FALSE && array_sum($cardboard) > 0){
-            Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
-            Shopware()->Session()->offsetSet('cardboardPrice', 20);
-        }  
-        if($updateOtherMaterialsInBasket === FALSE && array_sum($other_materials) > 0){
-            Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
-            Shopware()->Session()->offsetSet('other_materialPrice', 30);
-        }  
-        if($updatePlasticInBasket === FALSE && array_sum($plastic) > 0){
-            Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
-            Shopware()->Session()->offsetSet('plasticPrice', 40);            
-        }      
+
+    
         
     }
 
