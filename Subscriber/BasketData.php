@@ -21,7 +21,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 class BasketData implements SubscriberInterface
 {
-    
+
 
     // set license fee ordernumbers
     protected $alleLizenzArtikelOrdernumbers = array(
@@ -35,31 +35,33 @@ class BasketData implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'onAssignOrdernumbers',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
+            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
             'Theme_Compiler_Collect_Plugin_Javascript' => 'collectJavascriptFiles',
         ];
     }
 
     /* collects all javascript files in the specified locations */
-    public function collectJavascriptFiles(){
+    public function collectJavascriptFiles()
+    {
         $js = array(
-            __DIR__. '/../Resources/views/frontend/_public/src/js/jquery.test.js', // javascript from plugin resource
-            __DIR__. '/../Resources/Themes/Frontend/ThemeDateifabrik/frontend/_public/src/js/jquery.test.js', // javascript from theme resource
-		);
+            __DIR__ . '/../Resources/views/frontend/_public/src/js/jquery.test.js', // javascript from plugin resource
+            __DIR__ . '/../Resources/Themes/Frontend/ThemeDateifabrik/frontend/_public/src/js/jquery.test.js', // javascript from theme resource
+        );
 
         return new ArrayCollection($js);
     }
 
-    public function onAssignOrdernumbers(\Enlight_Event_EventArgs $args){
+    public function onAssignOrdernumbers(\Enlight_Event_EventArgs $args)
+    {
 
         $subject = $args->getSubject();
-        $view = $subject->View();  
-        $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);               
-
+        $view = $subject->View();
+        $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);
     }
 
-    public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args){
+    public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args)
+    {
 
         ///////////////////////////////////////////////////////////////////////
         // ToDo
@@ -68,25 +70,24 @@ class BasketData implements SubscriberInterface
 
         // only execute if the billing address (countryId) is germany (2)
         $countryId = $this->getCountryId();
-        if($countryId == 2){
+        if ($countryId == 2) {
 
             $subject = $args->getSubject();
             $action = $subject->request()->getQuery('action');
-            $view = $subject->View();  
-            $licenseFeeOption = $this->getSessionOption(); 
+            $view = $subject->View();
+            $licenseFeeOption = $this->getSessionOption();
 
             // view form and monitor option change only for action = confirm        
-            if($action == 'confirm')
-            {
+            if ($action == 'confirm') {
 
                 // show form only on confirm page if countryId = 2 (germany)
-                $view->assign('countryId', $countryId);       
+                $view->assign('countryId', $countryId);
 
                 // assignment of the new option when changing
                 // functions will be executed only when license fee option is set and has changed
-                if(isset($licenseFeeOption)){
+                if (isset($licenseFeeOption)) {
 
-                    switch($licenseFeeOption){
+                    switch ($licenseFeeOption) {
                         case 1:
                             $view->assign('selected1', 'selected="selected"');
                             $view->assign('selected2', '');
@@ -98,13 +99,12 @@ class BasketData implements SubscriberInterface
                     }
 
                     $this->setSessionOption($licenseFeeOption);
-                }                  
-
+                }
             }
 
-            if(isset($licenseFeeOption)){
+            if (isset($licenseFeeOption)) {
 
-                switch($licenseFeeOption){
+                switch ($licenseFeeOption) {
                     case 1:
                         // updates the licensearticles in basket
                         $this->updateLicenseArticles();
@@ -113,205 +113,194 @@ class BasketData implements SubscriberInterface
                         $this->deleteAllLicenseArticlesFromBasket($this->getBasketData());
                         break;
                 }
+            }
 
-            } 
-            
             $sortedItemsForBasketView = $this->sortItemsForBasketView();
             $view->assign('sortedItemsForBasketView', $sortedItemsForBasketView);
-    
-        } 
-
+        }
     }
 
-    public function updateLicenseArticles(){
+    public function updateLicenseArticles()
+    {
 
         $basketData = $this->getBasketData();
         //dump($basketData);
 
         $alu = array();
         $cardboard = array();
-        $other_materials = array();        
+        $other_materials = array();
         $plastic = array();
 
-        $updateAluInBasket = FALSE;
-        $updateCardboardInBasket = FALSE;        
-        $updateOtherMaterialsInBasket = FALSE;  
-        $updatePlasticInBasket = FALSE;    
-        
-        $addAlu = FALSE;
-        $addCardboard = FALSE;
-        $addOtherMaterials = FALSE;
-        $addPlastic = FALSE;
+        $aluIsInBasket = FALSE;
+        $cardboardIsInBasket = FALSE;
+        $otherMaterialsIsInBasket = FALSE;
+        $plasticIsInBasket = FALSE;
 
         // check, if material in basket is NEW, ADDED or REMOVED
-        foreach($basketData['content'] as $basket){
+        foreach ($basketData['content'] as $basket) {
 
             // don't check license articles
-            if(!in_array($basket['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
+            if (!in_array($basket['ordernumber'], $this->alleLizenzArtikelOrdernumbers)) {
                 // get the material option value
                 $p24LicenseMaterial = $basket['additional_details']['p24_license_material']; // (new values from) combo box option value
                 $p24Material = $basket['additional_details']['p24_material']; // (old) text like 'Pappe / PLA', materialHelper() returns new option value, if not empty
                 $standardMaterial = 'xoxo';
 
                 // beide sind leer = Standardmaterial
-                if(empty($p24LicenseMaterial) && empty($p24Material)){
+                if (empty($p24LicenseMaterial) && empty($p24Material)) {
                     $material = $standardMaterial;
                 }
-                if(empty($p24LicenseMaterial) && !empty($p24Material)){
+                if (empty($p24LicenseMaterial) && !empty($p24Material)) {
                     $material = $this->materialHelper($p24Material);
-                }                
-                if(!empty($p24LicenseMaterial) && !empty($p24Material)){
+                }
+                if (!empty($p24LicenseMaterial) && !empty($p24Material)) {
                     $material = $p24LicenseMaterial;
-                }                                
-                if(!empty($p24LicenseMaterial) && empty($p24Material)){
+                }
+                if (!empty($p24LicenseMaterial) && empty($p24Material)) {
                     $material = $p24LicenseMaterial;
-                }                   
+                }
 
-                if($material == 'alu'){
+                if ($material == 'alu') {
                     $alu[] = $basket['quantity'];
-                    $addAlu = TRUE;
                 }
-                if($material == 'cardboard'){
+                if ($material == 'cardboard') {
                     $cardboard[] = $basket['quantity'];
-                    $addCardboard = TRUE;
                 }
-                if($material == 'other_materials'){
+                if ($material == 'other_materials') {
                     $other_materials[] = $basket['quantity'];
-                    $addOtherMaterials = TRUE;
-                }                                
-                if($material == 'plastic'){
+                }
+                if ($material == 'plastic') {
                     $plastic[] = $basket['quantity'];
-                    $addPlastic = TRUE;
-                    $plasticWeight = ($basket['quantity'] * $basket['purchaseunit'] * str_replace(",",".",$basket['additional_details']['p24_license_weight']) / 1000);
-                }                
-
+                    $plasticWeight = ($basket['quantity'] * $basket['purchaseunit'] * str_replace(",", ".", $basket['additional_details']['p24_license_weight']) / 1000);
+                }
             }
             // if license article is already in basket, prepare update/add or delete from basket
-            else{
-                if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) > 0){
-                    $updateAluInBasket = TRUE; // change to TRUE, now sAddArticle() will not be executed
-                    $basketIdAlu = $basket['id'];                    
-                }
-                if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) > 0){
-                    $updateCardboardInBasket = TRUE; // change to TRUE, now sAddArticle() will not be executed
-                    $basketIdCardboard = $basket['id'];                     
-                }                
-                if($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) > 0){
-                    $updateOtherMaterialsInBasket = TRUE; // change to TRUE, now sAddArticle() will not be executed
-                    $basketIdOtherMaterials = $basket['id'];
-                }
-                if($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0){
-                    //$plasticPrice = (str_replace(",",".",$basket['price']) * $plasticWeight);
-                    $updatePlasticInBasket = TRUE; // change to TRUE, now sAddArticle() will not be executed
-                    $basketIdPlastic = $basket['id'];
-                }
+            else {
                 // deleting, material is no longer in basket
-                if($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) == 0){
+                if ($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) == 0) {
                     Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
-                }                                  
-                if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) == 0){
+                }
+                if ($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) == 0) {
                     Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
-                }                                  
-                if($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) == 0){
+                }
+                if ($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) == 0) {
                     Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
-                }                                  
-                if($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) == 0){
+                }
+                if ($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) == 0) {
                     Shopware()->Modules()->Basket()->sDeleteArticle($basket['id']);
-                }                                                                                  
+                }
+
+                if ($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) > 0) {
+                    $basketIdAlu = $basket['id'];
+                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));                    
+                    $aluIsInBasket = TRUE;
+                }
+                if ($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) > 0) {
+                    $basketIdCardboard = $basket['id'];
+                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));                    
+                    $cardboardIsInBasket = TRUE;
+                }
+                if ($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) > 0) {
+                    $basketIdOtherMaterials = $basket['id'];
+                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdOtherMaterials, array_sum($other_materials));                    
+                    $otherMaterialsIsInBasket = TRUE;
+                }
+                if ($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0) {
+                    $basketIdPlastic = $basket['id'];
+                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));                    
+                    $plasticIsInBasket = TRUE;
+                }                        
             }
 
-            // license article has to be added
-            if($addAlu === TRUE && array_sum($alu) > 0){
-                Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
-                Shopware()->Session()->offsetSet('aluPrice', 10);
-            }          
-            if($addCardboard === TRUE && array_sum($cardboard) > 0){
-                Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
-                Shopware()->Session()->offsetSet('cardboardPrice', 20);
-            }  
-            if($addOtherMaterials === TRUE && array_sum($other_materials) > 0){
-                Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
-                Shopware()->Session()->offsetSet('other_materialPrice', 30);
-            }              
-            if($addPlastic === TRUE && array_sum($plastic) > 0){
-                Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
-                Shopware()->Session()->offsetSet('plasticPrice', 40);            
-            }              
 
-        }   
+        }
 
-        // license article has to be updated
-        if($updateAluInBasket === TRUE){
-            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));
-            Shopware()->Session()->offsetSet('aluPrice', 10);            
+        if ($aluIsInBasket=== TRUE && array_sum($alu) > 0) {
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));   
+            Shopware()->Session()->offsetSet('aluPrice', 10);
         }
-        if($updateCardboardInBasket === TRUE){
-            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));
-            Shopware()->Session()->offsetSet('cardboardPrice', 20);            
+        if ($cardboardIsInBasket === TRUE && array_sum($cardboard) > 0) {
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));  
+            Shopware()->Session()->offsetSet('cardboardPrice', 20);
         }
-        if($updateOtherMaterialsInBasket === TRUE){
+        if ($otherMaterialsIsInBasket === TRUE && array_sum($other_materials) > 0) {
             Shopware()->Modules()->Basket()->sUpdateArticle($basketIdOtherMaterials, array_sum($other_materials));
             Shopware()->Session()->offsetSet('other_materialPrice', 30);
-        }                       
-        if($updatePlasticInBasket === TRUE){
-            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));
-            Shopware()->Session()->offsetSet('plasticPrice', 40);             
+        }
+        if ($plasticIsInBasket === TRUE && array_sum($plastic) > 0) {
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));   
+            Shopware()->Session()->offsetSet('plasticPrice', 30);
+        }        
+
+        // license article has to be added
+        if ($aluIsInBasket === FALSE && array_sum($alu) > 0) {
+            Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
+            Shopware()->Session()->offsetSet('aluPrice', 10);
+        }
+        if ($cardboardIsInBasket === FALSE && array_sum($cardboard) > 0) {
+            Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
+            Shopware()->Session()->offsetSet('cardboardPrice', 20);
+        }
+        if ($otherMaterialsIsInBasket === FALSE && array_sum($other_materials) > 0) {
+            Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
+            Shopware()->Session()->offsetSet('other_materialPrice', 30);
+        }
+        if ($plasticIsInBasket === FALSE && array_sum($plastic) > 0) {
+            Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
+            Shopware()->Session()->offsetSet('plasticPrice', 40);
         }
 
 
-    
-        
+                 
     }
 
-    public function deleteAllLicenseArticlesFromBasket($basket){
+    public function deleteAllLicenseArticlesFromBasket($basket)
+    {
 
-        foreach($basket['content'] as $content){
-            if(in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)){
+        foreach ($basket['content'] as $content) {
+            if (in_array($content['ordernumber'], $this->alleLizenzArtikelOrdernumbers)) {
                 $basketIDForDeleting = $content['id'];
                 Shopware()->Modules()->Basket()->sDeleteArticle($basketIDForDeleting);
             }
-        }        
-
-    }    
+        }
+    }
 
 
     // is thrown on every checkout action
-    public function checkoutPriceUpdateArticleFilter(\Enlight_Event_EventArgs $args){
+    public function checkoutPriceUpdateArticleFilter(\Enlight_Event_EventArgs $args)
+    {
 
         // show form only on confirm page if countryId = 2 (germany)
         $countryId = $this->getCountryId();
-        if($countryId == 2){
+        if ($countryId == 2) {
 
             $licenseFeeOption = $this->getSessionOption();
             $aluPrice = Shopware()->Session()->offsetGet('aluPrice');
             $cardboardPrice = Shopware()->Session()->offsetGet('cardboardPrice');
             $other_materialPrice = Shopware()->Session()->offsetGet('other_materialPrice');
-            $plasticPrice = Shopware()->Session()->offsetGet('plasticPrice');            
+            $plasticPrice = Shopware()->Session()->offsetGet('plasticPrice');
 
-            if(isset($licenseFeeOption) && $licenseFeeOption == 1){
+            if (isset($licenseFeeOption) && $licenseFeeOption == 1) {
 
                 // set new price for disposal fee article                
 
                 $basket = $args->getReturn();
-                if($basket['ordernumber'] == 'ENT-ALU-LZ'){
-                    $basket['price'] = $aluPrice / 1.19; 
+                if ($basket['ordernumber'] == 'ENT-ALU-LZ') {
+                    $basket['price'] = $aluPrice / 1.19;
                 }
-                if($basket['ordernumber'] == 'ENT-CARDBOARD-LZ'){
-                    $basket['price'] = $cardboardPrice / 1.19; 
+                if ($basket['ordernumber'] == 'ENT-CARDBOARD-LZ') {
+                    $basket['price'] = $cardboardPrice / 1.19;
                 }
-                if($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ'){
-                    $basket['price'] = $other_materialPrice / 1.19; 
-                }                
-                if($basket['ordernumber'] == 'ENT-PLASTIC-LZ'){
+                if ($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ') {
+                    $basket['price'] = $other_materialPrice / 1.19;
+                }
+                if ($basket['ordernumber'] == 'ENT-PLASTIC-LZ') {
                     // set new price for disposal fee article
-                    $basket['price'] = $plasticPrice / 1.19; 
+                    $basket['price'] = $plasticPrice / 1.19;
                 }
-                $args->setReturn($basket);                
-
-            }        
-
+                $args->setReturn($basket);
+            }
         }
-        
     }
 
 
@@ -320,51 +309,52 @@ class BasketData implements SubscriberInterface
     ################################################################################################
     // helper functions
 
-    public function getSessionOption(){
+    public function getSessionOption()
+    {
 
-        return Shopware()->Session()->offsetGet('applyLicenseFeeOption');    
+        return Shopware()->Session()->offsetGet('applyLicenseFeeOption');
+    }
 
-    }    
+    public function setSessionOption($licenseFeeOption)
+    {
 
-    public function setSessionOption($licenseFeeOption){
-    
         Shopware()->Session()->offsetSet('applyLicenseFeeOption', $licenseFeeOption);
-
     }
 
-    public function getCountryId(){
+    public function getCountryId()
+    {
 
-        return Shopware()->Modules()->Admin()->sGetUserData()['billingaddress']['countryId'];    
-
+        return Shopware()->Modules()->Admin()->sGetUserData()['billingaddress']['countryId'];
     }
 
-    public function getBasketData(){
+    public function getBasketData()
+    {
 
         return Shopware()->Modules()->Basket()->sGetBasketData();
-
     }
 
     // always sorts the license items at the end of the array so that they can be output as the last item in the basket list in the frontend
-    public function sortItemsForBasketView(){
+    public function sortItemsForBasketView()
+    {
 
         $basket = $this->getBasketData();
         $i = 0;
-        foreach($basket['content'] as $content){
-            if($content['additional_details']['supplierID'] == 20){
+        foreach ($basket['content'] as $content) {
+            if ($content['additional_details']['supplierID'] == 20) {
                 $append = $content;
                 unset($basket['content'][$i]);
                 array_push($basket['content'], $append);
             }
             $i++;
         }
-        
+
         $basket['content'] = array_values($basket['content']);
         return $basket;
-
     }
 
-    public function materialHelper($material){
-        
+    public function materialHelper($material)
+    {
+
         $alu = [];
         $cardboard = [
             'Karton',
@@ -423,22 +413,19 @@ class BasketData implements SubscriberInterface
             'Styropor',
         ];
 
-        if(in_array($material, $alu)){
+        if (in_array($material, $alu)) {
             $material = 'alu';
         }
-        if(in_array($material, $cardboard)){
+        if (in_array($material, $cardboard)) {
             $material = 'cardboard';
         }
-        if(in_array($material, $otherMaterial)){
+        if (in_array($material, $otherMaterial)) {
             $material = 'other_material';
-        }        
-        if(in_array($material, $plastic)){
+        }
+        if (in_array($material, $plastic)) {
             $material = 'plastic';
         }
 
         return $material;
-
-    }    
-
-
+    }
 }
