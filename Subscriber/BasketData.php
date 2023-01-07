@@ -35,7 +35,7 @@ class BasketData implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'onAssignOrdernumbers',
-            'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
             'Theme_Compiler_Collect_Plugin_Javascript' => 'collectJavascriptFiles',
         ];
@@ -123,6 +123,7 @@ class BasketData implements SubscriberInterface
     public function updateLicenseArticles()
     {
 
+        Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', 20);
         $basketData = $this->getBasketData();
         //dump($basketData);
 
@@ -130,11 +131,6 @@ class BasketData implements SubscriberInterface
         $cardboard = array();
         $other_materials = array();
         $plastic = array();
-
-        $aluIsInBasket = FALSE;
-        $cardboardIsInBasket = FALSE;
-        $otherMaterialsIsInBasket = FALSE;
-        $plasticIsInBasket = FALSE;
 
         // check, if material in basket is NEW, ADDED or REMOVED
         foreach ($basketData['content'] as $basket) {
@@ -192,62 +188,48 @@ class BasketData implements SubscriberInterface
 
                 if ($basket['ordernumber'] == 'ENT-ALU-LZ' && array_sum($alu) > 0) {
                     $basketIdAlu = $basket['id'];
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));                    
-                    $aluIsInBasket = TRUE;
                 }
                 if ($basket['ordernumber'] == 'ENT-CARDBOARD-LZ' && array_sum($cardboard) > 0) {
                     $basketIdCardboard = $basket['id'];
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));                    
-                    $cardboardIsInBasket = TRUE;
                 }
                 if ($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ' && array_sum($other_materials) > 0) {
                     $basketIdOtherMaterials = $basket['id'];
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdOtherMaterials, array_sum($other_materials));                    
-                    $otherMaterialsIsInBasket = TRUE;
                 }
                 if ($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0) {
                     $basketIdPlastic = $basket['id'];
-                    Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));                    
-                    $plasticIsInBasket = TRUE;
                 }                        
             }
 
 
         }
 
-        if ($aluIsInBasket=== TRUE && array_sum($alu) > 0) {
+        // wird nur bei erstausführung in checkout/confirm ausgeführt ??
+        if (isset($basketIdAlu)) {
             Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));   
-            Shopware()->Session()->offsetSet('aluPrice', 10);
         }
-        if ($cardboardIsInBasket === TRUE && array_sum($cardboard) > 0) {
+        if (isset($basketIdCardboard)) {
             Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));  
-            Shopware()->Session()->offsetSet('cardboardPrice', 20);
         }
-        if ($otherMaterialsIsInBasket === TRUE && array_sum($other_materials) > 0) {
+        if (isset($basketIdOtherMaterials)) {
             Shopware()->Modules()->Basket()->sUpdateArticle($basketIdOtherMaterials, array_sum($other_materials));
-            Shopware()->Session()->offsetSet('other_materialPrice', 30);
         }
-        if ($plasticIsInBasket === TRUE && array_sum($plastic) > 0) {
+        if (isset($basketIdPlastic)) {
             Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));   
-            Shopware()->Session()->offsetSet('plasticPrice', 30);
-        }        
+        }  
+            
 
         // license article has to be added
-        if ($aluIsInBasket === FALSE && array_sum($alu) > 0) {
+        if (!isset($basketIdAlu) && array_sum($alu) > 0) {
             Shopware()->Modules()->Basket()->sAddArticle('ENT-ALU-LZ', array_sum($alu));
-            Shopware()->Session()->offsetSet('aluPrice', 10);
         }
-        if ($cardboardIsInBasket === FALSE && array_sum($cardboard) > 0) {
+        if (!isset($basketIdCardboard) && array_sum($cardboard) > 0) {
             Shopware()->Modules()->Basket()->sAddArticle('ENT-CARDBOARD-LZ', array_sum($cardboard));
-            Shopware()->Session()->offsetSet('cardboardPrice', 20);
         }
-        if ($otherMaterialsIsInBasket === FALSE && array_sum($other_materials) > 0) {
+        if (!isset($basketIdOtherMaterials) && array_sum($other_materials) > 0) {
             Shopware()->Modules()->Basket()->sAddArticle('ENT-OTHER_MATERIALS-LZ', array_sum($other_materials));
-            Shopware()->Session()->offsetSet('other_materialPrice', 30);
         }
-        if ($plasticIsInBasket === FALSE && array_sum($plastic) > 0) {
+        if (!isset($basketIdPlastic) && array_sum($plastic) > 0) {
             Shopware()->Modules()->Basket()->sAddArticle('ENT-PLASTIC-LZ', array_sum($plastic));
-            Shopware()->Session()->offsetSet('plasticPrice', 40);
         }
 
 
@@ -285,18 +267,18 @@ class BasketData implements SubscriberInterface
                 // set new price for disposal fee article                
 
                 $basket = $args->getReturn();
-                if ($basket['ordernumber'] == 'ENT-ALU-LZ') {
-                    $basket['price'] = $aluPrice / 1.19;
-                }
-                if ($basket['ordernumber'] == 'ENT-CARDBOARD-LZ') {
-                    $basket['price'] = $cardboardPrice / 1.19;
-                }
-                if ($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ') {
-                    $basket['price'] = $other_materialPrice / 1.19;
-                }
+                // if ($basket['ordernumber'] == 'ENT-ALU-LZ') {
+                //     $basket['price'] = $aluPrice / 1.19;
+                // }
+                // if ($basket['ordernumber'] == 'ENT-CARDBOARD-LZ') {
+                //     $basket['price'] = $cardboardPrice / 1.19;
+                // }
+                // if ($basket['ordernumber'] == 'ENT-OTHER_MATERIALS-LZ') {
+                //     $basket['price'] = $other_materialPrice / 1.19;
+                // }
                 if ($basket['ordernumber'] == 'ENT-PLASTIC-LZ') {
-                    // set new price for disposal fee article
-                    $basket['price'] = $plasticPrice / 1.19;
+                //     // set new price for disposal fee article
+                    $basket['price'] = 5.00 / 1.19;
                 }
                 $args->setReturn($basket);
             }
