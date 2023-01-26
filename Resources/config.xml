@@ -9,7 +9,7 @@
             <value>preselection</value>
             <description lang="de">Kosten pro kg</description>
             <description lang="en">cost per kg</description>
-        </element>        
+        </element>
         <element required="true" type="number" scope="locale">
             <name>Pappe</name>
             <label lang="de">Papier / Pappe / Karton</label>
@@ -17,7 +17,7 @@
             <value>preselection</value>
             <description lang="de">Kosten pro kg</description>
             <description lang="en">cost per kg</description>
-        </element>        
+        </element>
         <element required="true" type="number" scope="locale">
             <name>Plastik</name>
             <label lang="de">Kunststoff / Plastik</label>
@@ -25,7 +25,7 @@
             <value>preselection</value>
             <description lang="de">Kosten pro kg</description>
             <description lang="en">cost per kg</description>
-        </element>                        
+        </element>
         <element required="true" type="number" scope="locale">
             <name>sonstige</name>
             <label lang="de">sonstiges Material</label>
@@ -33,6 +33,6 @@
             <value>preselection</value>
             <description lang="de">Kosten pro kg</description>
             <description lang="en">cost per kg</description>
-        </element>                        
+        </element>
     </elements>
 </config>

@@ -14,7 +14,22 @@ class DateifabrikP24DisposalFee extends Plugin
     public function install(InstallContext $context)
     {
 
-/*          
+
+        $shop = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop')->findOneBy(array('default' => true));
+        $pluginManager = Shopware()->Container()->get('shopware_plugininstaller.plugin_manager');
+        $plugin = $pluginManager->getPluginByName('DateifabrikP24DisposalFee');
+
+        $config = [
+            'Aluminium'     => 500,
+            'Pappe'         => 200,
+            'Plastik'       => 8.15,
+        ];
+
+        foreach ($config as $key => $value) {
+            $pluginManager->saveConfigElement($plugin, $key, $value, $shop);
+        }
+
+/*
             $articleApi = $this->container->get('shopware.api.article');
 
             $params = array(
@@ -26,7 +41,7 @@ class DateifabrikP24DisposalFee extends Plugin
                     [
                     'id' => 2169
                     ]
-                ],                        
+                ],
                 'mainDetail' => [
                     'number' => 'MeineNumber',
                     'active' => true,
@@ -35,12 +50,12 @@ class DateifabrikP24DisposalFee extends Plugin
                         'customerGroupKey' => 'EK',
                         'price'=> 999.88 // netto
                         ]
-                    ]                            
+                    ]
                 ]
             )
             ;
             $articleApi->create($params);
-            
+
 */
     }
 

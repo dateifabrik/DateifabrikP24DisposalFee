@@ -19,9 +19,9 @@ namespace DateifabrikP24DisposalFee\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
+
 class BasketData implements SubscriberInterface
 {
-
 
     // set license fee ordernumbers
     protected $alleLizenzArtikelOrdernumbers = array(
@@ -58,10 +58,15 @@ class BasketData implements SubscriberInterface
         $subject = $args->getSubject();
         $view = $subject->View();
         $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);
+
+
     }
 
     public function onPreDispatchCheckout(\Enlight_Event_EventArgs $args)
     {
+
+        $config = Shopware()->Container()->get('shopware.plugin.cached_config_reader')->getByPluginName('DateifabrikP24DisposalFee');
+        dump($config);
 
         ///////////////////////////////////////////////////////////////////////
         // ToDo
@@ -77,7 +82,7 @@ class BasketData implements SubscriberInterface
             $view = $subject->View();
             $licenseFeeOption = $this->getSessionOption();
 
-            // view form and monitor option change only for action = confirm        
+            // view form and monitor option change only for action = confirm
             if ($action == 'confirm') {
 
                 // show form only on confirm page if countryId = 2 (germany)
@@ -140,21 +145,25 @@ class BasketData implements SubscriberInterface
                 // get the material option value
                 $p24LicenseMaterial = $basket['additional_details']['p24_license_material']; // (new values from) combo box option value
                 $p24Material = $basket['additional_details']['p24_material']; // (old) text like 'Pappe / PLA', materialHelper() returns new option value, if not empty
-                $standardMaterial = 'xoxo';
 
+                //$standardMaterial = 'xoxo';
                 // beide sind leer = Standardmaterial
+                /*
                 if (empty($p24LicenseMaterial) && empty($p24Material)) {
                     $material = $standardMaterial;
                 }
+                */
                 if (empty($p24LicenseMaterial) && !empty($p24Material)) {
                     $material = $this->materialHelper($p24Material);
                 }
-                if (!empty($p24LicenseMaterial) && !empty($p24Material)) {
+                if (!empty($p24LicenseMaterial) /* && !empty($p24Material ) */) {
                     $material = $p24LicenseMaterial;
                 }
+                /*
                 if (!empty($p24LicenseMaterial) && empty($p24Material)) {
                     $material = $p24LicenseMaterial;
                 }
+                */
 
                 if ($material == 'alu') {
                     $alu[] = $basket['quantity'];
@@ -162,7 +171,7 @@ class BasketData implements SubscriberInterface
                 if ($material == 'cardboard') {
                     $cardboard[] = $basket['quantity'];
                 }
-                if ($material == 'other_materials') {
+                if ($material == 'other_material') {
                     $other_materials[] = $basket['quantity'];
                 }
                 if ($material == 'plastic') {
@@ -197,7 +206,7 @@ class BasketData implements SubscriberInterface
                 }
                 if ($basket['ordernumber'] == 'ENT-PLASTIC-LZ' && array_sum($plastic) > 0) {
                     $basketIdPlastic = $basket['id'];
-                }                        
+                }
             }
 
 
@@ -205,18 +214,18 @@ class BasketData implements SubscriberInterface
 
         // wird nur bei erstausführung in checkout/confirm ausgeführt ??
         if (isset($basketIdAlu)) {
-            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));   
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdAlu, array_sum($alu));
         }
         if (isset($basketIdCardboard)) {
-            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));  
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdCardboard, array_sum($cardboard));
         }
         if (isset($basketIdOtherMaterials)) {
             Shopware()->Modules()->Basket()->sUpdateArticle($basketIdOtherMaterials, array_sum($other_materials));
         }
         if (isset($basketIdPlastic)) {
-            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));   
-        }  
-            
+            Shopware()->Modules()->Basket()->sUpdateArticle($basketIdPlastic, array_sum($plastic));
+        }
+
 
         // license article has to be added
         if (!isset($basketIdAlu) && array_sum($alu) > 0) {
@@ -233,7 +242,7 @@ class BasketData implements SubscriberInterface
         }
 
 
-                 
+
     }
 
     public function deleteAllLicenseArticlesFromBasket($basket)
@@ -264,7 +273,7 @@ class BasketData implements SubscriberInterface
 
             if (isset($licenseFeeOption) && $licenseFeeOption == 1) {
 
-                // set new price for disposal fee article                
+                // set new price for disposal fee article
 
                 $basket = $args->getReturn();
                 // if ($basket['ordernumber'] == 'ENT-ALU-LZ') {
