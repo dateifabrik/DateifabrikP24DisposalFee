@@ -81,7 +81,7 @@ class BasketData implements SubscriberInterface
 
         ///////////////////////////////////////////////////////////////////////
         // ToDo
-        // Lizenzartikel im Warenkorb können nicht geläscht werden
+        // Lizenzartikel im Warenkorb können nicht gelöscht werden
         // Anzahl der Lizenzartikel im Warenkorb nicht änderbar
 
         // only execute if the billing address (countryId) is germany (2)
