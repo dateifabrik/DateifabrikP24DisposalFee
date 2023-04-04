@@ -30,13 +30,18 @@ class DateifabrikP24DisposalFee extends Plugin
         }
 
 /*
+
+            // erst Kategorie prüfen oder anlegen
+            // auch erst Hersteller prüfen oder anlegen
+
+
             $articleApi = $this->container->get('shopware.api.article');
 
             $params = array(
                 'name' => 'MeinArtikelname',
                 'active' => true,
                 'taxId' => 1,
-                'supplier' => 'MeinHersteller',
+                'supplier' => 'MeinHersteller', // oder HerstellerID holen aus dem eben angelegten/geprüften
                 'categories' => [
                     [
                     'id' => 2169
