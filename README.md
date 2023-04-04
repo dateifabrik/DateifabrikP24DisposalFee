@@ -27,29 +27,29 @@ Plugin zur Berechung der Verpackungskosten für Packing24
     'ENT-CARDBOARD-LZ',  
     'ENT-OTHER_MATERIALS-LZ',  
     'ENT-PLASTIC-LZ',  
-    - Artikel aktiv
-    - Preise: Shopkunden netto 0,01
-    - Maßeinheit: Stück
+    - Artikel aktiv  
+    - Preise: Shopkunden netto 0,01  
+    - Maßeinheit: Stück  
 
-    #000A98
+    #000A98  
 
-    Kategorie: Lizenzierung
+    Kategorie: Lizenzierung  
 
-    Entsorgungskosten Plastik
-    ENT-PLASTIC-LZ
-    1.01
+    Entsorgungskosten Plastik  
+    ENT-PLASTIC-LZ  
+    1.01  
 
-    Entsorgungskosten Andere Materialien
-    ENT-OTHER_MATERIALS-LZ
-    0.08
+    Entsorgungskosten Andere Materialien  
+    ENT-OTHER_MATERIALS-LZ  
+    0.08  
 
-    Entsorgungskosten Pappe/Papier/Karton
-    ENT-CARDBOARD-LZ
-    0.24
+    Entsorgungskosten Pappe/Papier/Karton  
+    ENT-CARDBOARD-LZ  
+    0.24  
 
-    Entsorgungskosten Aluminium
-    ENT-ALU-LZ
-    0.84
+    Entsorgungskosten Aluminium  
+    ENT-ALU-LZ  
+    0.84  
 
 ---
 
