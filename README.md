@@ -19,7 +19,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 ---
 
 - Hersteller: Lizenzero
-- Kategorie: Lizeenzierung
+- Kategorie: Lizenzierung
 - Artikel:  
     - Hersteller Lizenzero zuordnen
     - Artikelbezeichnung, Artikelnummer:  
@@ -53,7 +53,7 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 
 ---
 
-        #### engine/Shopware/Bundle/StoreFrontBundle/Gateway/ConfiguratorGatewayInterface.php
+        #### engine/Shopware/Plugins/Community/Core/ViisonSetArticles/Components/ConfiguratorGatewayDecorator.php
         /**
         * @inheritdoc
         */
