@@ -31,6 +31,37 @@ Plugin zur Berechung der Verpackungskosten für Packing24
     - Preise: Shopkunden netto 0,01
     - Maßeinheit: Stück
 
+    #000A98
+
+    Kategorie: Lizenzierung
+
+    Entsorgungskosten Plastik
+    ENT-PLASTIC-LZ
+    1.01
+
+    Entsorgungskosten Andere Materialien
+    ENT-OTHER_MATERIALS-LZ
+    0.08
+
+    Entsorgungskosten Pappe/Papier/Karton
+    ENT-CARDBOARD-LZ
+    0.24
+
+    Entsorgungskosten Aluminium
+    ENT-ALU-LZ
+    0.84
+
+---
+
+        #### engine/Shopware/Bundle/StoreFrontBundle/Gateway/ConfiguratorGatewayInterface.php
+        /**
+        * @inheritdoc
+        */
+        public function getAvailableConfigurations(Struct\BaseProduct $product): array
+        {
+            return $this->decoratedInstance->getAvailableConfigurations($product);    
+        }    
+
 ---
 
 ### optional
