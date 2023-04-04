@@ -16,6 +16,23 @@ Plugin zur Berechung der Verpackungskosten für Packing24
 - Datenbank Materialien vereinheitlichen, Freitextfeld mit select?
 - p24_* Felder checken, ob alle in der Form belegt sind und benötigt werden
 
+---
+
+- Hersteller: Lizenzero
+- Kategorie: Lizeenzierung
+- Artikel:  
+    - Hersteller Lizenzero zuordnen
+    - Artikelbezeichnung, Artikelnummer:  
+    'ENT-ALU-LZ',  
+    'ENT-CARDBOARD-LZ',  
+    'ENT-OTHER_MATERIALS-LZ',  
+    'ENT-PLASTIC-LZ',  
+    - Artikel aktiv
+    - Preise: Shopkunden netto 0,01
+    - Maßeinheit: Stück
+
+---
+
 ### optional
 
 - Anzeige Lizenzgebühren am Artikel
