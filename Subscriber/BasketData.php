@@ -37,8 +37,19 @@ class BasketData implements SubscriberInterface
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'onAssignOrdernumbers',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'onPreDispatchCheckout',
             'Shopware_Modules_Basket_getPriceForUpdateArticle_FilterPrice' => 'checkoutPriceUpdateArticleFilter',
+            'Shopware_Controllers_Backend_Config_after_save_form_data' => 'savePluginConfigToBackendAndDatabase',
             'Theme_Compiler_Collect_Plugin_Javascript' => 'collectJavascriptFiles',
         ];
+    }
+
+
+    public function savePluginConfigToBackendAndDatabase(\Enlight_Event_EventArgs $args){
+
+        /** @var \Shopware_Controllers_Backend_Config $controller */
+        $controller = $args->get('subject');
+
+        $config = $controller->Request()->getParam('config');
+
     }
 
     /* collects all javascript files in the specified locations */
@@ -58,7 +69,7 @@ class BasketData implements SubscriberInterface
         $subject = $args->getSubject();
         $view = $subject->View();
         $view->assign('disposalFeeOrdernumbers', $this->alleLizenzArtikelOrdernumbers);
-
+        Shopware()->Container()->get('pluginlogger')->error('Test PJ log', ['some text']);
 
     }
 
