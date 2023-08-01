@@ -1,0 +1,5 @@
+{
+    "name": "dateifabrik/dateifabrikp24disposalfee",
+    "type": "shopware-plugin",
+    "description": "Berechnung Entsorgungskosten"
+}
