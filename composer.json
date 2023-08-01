@@ -2,7 +2,7 @@
   "name": "dateifabrik/dateifabrikp24disposalfee",
   "type": "shopware-plugin",
   "description": "Berechnung Entsorgungskosten",
-  "version": "0.0.5",
+  "version": "0.0.4.3",
   "license": "MIT",
   "authors": [
     {
@@ -16,5 +16,8 @@
       "type": "vcs",
       "url": "https://github.com/dateifabrik/dateifabrikp24disposalfee"
     }
-  ]
+  ],
+  "require": {
+    "dateifabrik/dateifabrikp24disposalfee": "^0.0.3"
+  }
 }
