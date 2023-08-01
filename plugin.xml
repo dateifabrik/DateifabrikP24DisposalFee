@@ -11,6 +11,18 @@
     <author>Dateifabrik</author>
     <compatibility minVersion="5.7.11"/>
 
+    <changelog version="0.0.3">
+        <changes lang="de">
+        <![CDATA[
+            <ul>
+                <li> - kann jetzt mit composer installiert werden</li>
+            </ul>
+        ]]>
+        </changes>
+        <changes lang="en">Version 01.08.2023</changes>
+    </changelog>
+
+
     <changelog version="0.0.2">
         <changes lang="de">
         <![CDATA[
