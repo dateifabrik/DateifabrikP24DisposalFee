@@ -1,0 +1,24 @@
+{
+  "name": "dateifabrik/dateifabrik-p24-disposal-fee",
+  "description": "Plugin to calculate disposal fee",
+  "type": "shopware-platform-plugin",
+  "license": "MIT",
+  "version": "0.0.3",
+  "authors": [
+    {
+      "name": "Dateifabrik"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "DateifabrikP24DisposalFee\\": "src/"
+    }
+  },
+  "extra": {
+    "shopware-plugin-class": "DateifabrikP24DisposalFee\\\\DateifabrikP24DisposalFee\\",
+    "label": {
+      "de-DE": "Dateifabrik Packing24 Entsorgungsgebühr",
+      "en-GB": "Dateifabrik Packing24 disposal fee"
+    }
+  }
+}
