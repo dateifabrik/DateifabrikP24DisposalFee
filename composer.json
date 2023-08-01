@@ -18,6 +18,6 @@
     }
   ],
   "require": {
-    "dateifabrik/dateifabrikp24disposalfee": "^0.0.3"
+    "dateifabrik/dateifabrikp24disposalfee": "0.0.4.2"
   }
 }
