@@ -3,7 +3,7 @@
     "type": "shopware-plugin",
     "description": "Dateifabrik Packing24 Plugin zur Berechnung der Entsorgungsgebühr",
     "require": {
-        "dateifabrik/DateifabrikP24DisposalFee": "v0.0.6"
+        "dateifabrik/dateifabrikp24disposalfee": "v0.0.6"
     },
     "repositories": [
         {
