@@ -1,5 +1,5 @@
 {
-  "name": "dateifabrik/dateifabrik-p24-disposal-fee",
+  "name": "dateifabrik/dateifabrikp24disposalfee",
   "description": "Plugin to calculate disposal fee",
   "type": "shopware-platform-plugin",
   "license": "MIT",
@@ -20,5 +20,14 @@
       "de-DE": "Dateifabrik Packing24 Entsorgungsgebühr",
       "en-GB": "Dateifabrik Packing24 disposal fee"
     }
-  }
+  },
+  "require-dev": {
+      "dateifabrik/DateifabrikP24DisposalFee": "dev-master#main"
+  },
+  "repositories": [
+      {
+          "type": "vcs",
+          "url": "git@github.com:dateifabrik/DateifabrikP24disposalFee.git"
+      }
+  ]
 }
