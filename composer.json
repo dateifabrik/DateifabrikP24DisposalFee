@@ -1,5 +1,5 @@
 {
-  "name": "dateifabrik/dateifabrikp24disposalfee",
+  "name": "dateifabrik/DateifabrikP24DisposalFee",
   "type": "shopware-plugin",
   "description": "Berechnung Entsorgungskosten",
   "version": "0.0.4.3",
@@ -12,7 +12,8 @@
   ],
   "autoload": {
     "psr-4": {
-      "dateifabrik\\dateifabrikp24disposalfee\\": "src/"
+      "DateifabrikP24DisposalFee\\": "Controllers/Frontend",
+      "DateifabrikP24DisposalFee\\Subscriber\\": "Subscriber/"
     }
   }
 }
