@@ -10,14 +10,9 @@
       "email": "kontakt@dateifabrik.de"
     }
   ],
-  "minimum-stability": "stable",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/dateifabrik/dateifabrikp24disposalfee"
+  "autoload": {
+    "psr-4": {
+      "dateifabrik\\dateifabrikp24disposalfee\\": "src/"
     }
-  ],
-  "require": {
-    "dateifabrik/dateifabrikp24disposalfee": "0.0.4.2"
   }
 }
