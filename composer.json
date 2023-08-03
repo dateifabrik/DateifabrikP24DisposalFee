@@ -2,7 +2,6 @@
   "name": "dateifabrik/dateifabrik-p24-disposal-fee",
   "type": "shopware-plugin",
   "description": "Berechnung Entsorgungskosten",
-  "version": "0.0.4.3",
   "license": "MIT",
   "extra": {
     "installer-name": "DateifabrikP24DisposalFee"
