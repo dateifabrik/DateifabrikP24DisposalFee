@@ -4,6 +4,15 @@
   "description": "Berechnung Entsorgungskosten",
   "version": "0.0.4.3",
   "license": "MIT",
+  "extra": {
+    "installer-name": "DateifabrikP24DisposalFee"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/dateifabrik/DateifabrikP24DisposalFee"
+    }
+  ],
   "authors": [
     {
       "name": "Dateifabrik",
