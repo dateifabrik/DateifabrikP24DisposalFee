@@ -4,12 +4,25 @@
     <label lang="de">Dateifabrik P24 Entsorgungsgebühr</label>
     <label lang="en">Dateifabrik P24 Disposal Fee</label>
 
-    <version>0.0.202</version>
+    <version>0.0.203</version>
+    
     <copyright>Dateifabrik</copyright>
     <license>MIT</license>
     <link>https://dateifabrik.de</link>
     <author>Dateifabrik</author>
     <compatibility minVersion="5.7.11"/>
+
+    <changelog version="0.0.203">
+        Version 02.11.2023
+        <changes lang="de">
+        <![CDATA[
+            <ul>
+                <li> - test tag v0.0.203 only</li>
+            </ul>
+        ]]>
+        </changes>
+        <changes lang="en">Version 02.11.2023</changes>
+    </changelog>    
 
     <changelog version="0.0.202">
         Version 02.11.2023
